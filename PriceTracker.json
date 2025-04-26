@@ -1,0 +1,269 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Define Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Products": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Price": {
+      "main": [
+        [
+          {
+            "node": "Format Price",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Price": {
+      "main": [
+        [
+          {
+            "node": "Price Below Target?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Price Below Target?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Alert Required",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Notification": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-04-21T10:24:46.070Z",
+  "id": "D2S2GMi5EQhpLESa",
+  "meta": {},
+  "name": "PriceTracker",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "403bad09-4303-485d-8613-d602f2b9b132",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        620,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      productName: \"Example Product 1\", \n      url: \"https://www.amazon.com/dp/B084J4QQFT/\",\n      targetPrice: 400\n    }\n  }\n];"
+      },
+      "id": "b91fa146-5267-442e-a31a-3a295ce83725",
+      "name": "Define Products",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        820,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "id": "8fbbb227-3017-4529-86cb-c2fb19509b9d",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1020,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "sourceData": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "<<KEY_REMOVED>>",
+              "cssSelector": "span.a-offscreen:first"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb4a5848-06b5-44ac-8312-164cdf7a180c",
+      "name": "Extract Price",
+      "type": "n8n-nodes-base.htmlExtract",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = items[0];\nlet currentPrice = null;\nlet rawPrice = null;\n\n// Adjust data access based on HTML Extract output if needed\n// It might be item.json.price directly now, or item.json.data.price if dataPropertyName existed\n// Check the actual output of the HTML Extract node to be sure\nif (item.json.price) { // Assuming direct key 'price' from extraction\n  rawPrice = item.json.price;\n  try {\n    let priceString = rawPrice.replace(/[^\\d.]/g, ''); \n    currentPrice = parseFloat(priceString);\n    if (isNaN(currentPrice)) { currentPrice = null; }\n  } catch (error) { \n    console.error(\"Error parsing price:\", rawPrice, error);\n    currentPrice = null;\n  }\n} else {\n    console.log(\"Price data not found in input for:\", item.json.productName);\n}\n\nitem.json.currentPrice = currentPrice;\nitem.json.rawPrice = rawPrice;\nitem.json.priceCheckTime = new Date().toISOString();\n\nreturn item;"
+      },
+      "id": "aac2d217-4306-4499-8172-c13eae09e2cb",
+      "name": "Format Price",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.currentPrice !== null }}",
+              "value2": true
+            },
+            {
+              "value1": "={{ $json.currentPrice <= $json.targetPrice }}",
+              "operation": "AND",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "932bdc64-ea02-4fc4-92df-bbc594ed63c3",
+      "name": "Price Below Target?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "alertTitle",
+              "value": "🔔 Price Alert: {{ $json.productName }}"
+            },
+            {
+              "name": "alertMessage",
+              "value": "💰 Current Price: ${{ $json.currentPrice }}\n📉 Target Price: ${{ $json.targetPrice }}\n\n✅ Price at/below target!\n\n🛒 <{{ $json.url }}|View Product>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "49cc075c-b16d-4897-b6cc-125f5e437b60",
+      "name": "Prepare Notification",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "No alert: {{ $json.productName }} price (${{ $json.currentPrice }}) > target (${{ $json.targetPrice }})"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "216c2d9d-1411-4d53-9167-eb7d718eaae6",
+      "name": "No Alert Required",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        920
+      ]
+    },
+    {
+      "parameters": {
+        "channel": "#price-alerts",
+        "text": "={{ $json.alertTitle }}",
+        "otherOptions": {},
+        "attachments": [
+          {
+            "text": "={{ $json.alertMessage }}",
+            "color": "#00ff00"
+          }
+        ]
+      },
+      "id": "b4de9e9f-8997-4588-a10b-2bed159fcf97",
+      "name": "Send Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        720
+      ]
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-04-21T12:30:59.000Z",
+  "versionId": "fd4c38ca-393b-4b28-b7b8-719b61ad0927"
+}

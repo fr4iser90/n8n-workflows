@@ -1,0 +1,277 @@
+{
+  "active": false,
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "parseAndPrepare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parseAndPrepare": {
+      "main": [
+        [
+          {
+            "node": "searchExistingEvents",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "extractEvents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extractEvents": {
+      "main": [
+        [
+          {
+            "node": "createEvents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "searchExistingEvents": {
+      "main": [
+        [
+          {
+            "node": "deleteExistingEvents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deleteExistingEvents": {
+      "main": [
+        [
+          {
+            "node": "waitForDeletion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-04-20T23:05:13.449Z",
+  "id": "Vr8hT99Uh5OaB3bu",
+  "meta": null,
+  "name": "SchichtplanGoogleCalendar",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        4700,
+        5320
+      ],
+      "id": "b0e38219-27f9-4509-8ffa-174ade5304c4",
+      "name": "When clicking 'Test workflow'"
+    },
+    {
+      "parameters": {
+        "fileSelector": "<<ABSOLUTE_FILE_PATH_REMOVED>>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        4920,
+        5320
+      ],
+      "id": "859049fe-c1a5-442d-8d54-7a41334302c9",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5140,
+        5320
+      ],
+      "id": "7b3d3abc-f2a2-4cdf-8099-14dcc7165505",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mapping of start-end times to shift codes\nconst shiftCodes = {\n    '07:35-15:50': 'F',\n    '08:30-16:45': 'F1',\n    '09:00-17:15': 'F2',\n    '09:30-17:45': 'F3',\n    '10:00-18:15': 'M1',\n    '11:00-19:15': 'M2',\n    '11:35-19:50': 'M3', // This is the key for potential MO merge\n    // B36, B38, MO are handled by specific logic below\n};\n\n// Function to parse the PDF text content\nfunction parseTimeSheet(pdfData) {\n    const text = pdfData.text;\n    const lines = text.split('\\n');\n    const mainEntries = []; // Store regular shifts, vacation, holidays\n    const bereitschaftEntries = []; // Store all entries from Bereitschaftsdienste section\n    let currentYear = '';\n    let currentMonth = '';\n\n    // Regex patterns\n    const monthYearRegex = /Abrechnungsmonat (\\d{2})\\/(\\d{4})/;\n    const shiftRegex = /^(\\d{2})\\s+\\w+\\s+KO\\*\\s+(\\d{2}:\\d{2})\\s+GE\\*\\s+(\\d{2}:\\d{2})/;\n    const vacationRegex = /^(\\d{2})\\s+\\w+\\s+URLTV/;\n    const holidayRegex = /^(\\d{2})\\s+\\w+\\*?\\s+FEIER/;\n    const onCallBereitschaftRegex = /^(\\d{2}\\.\\d{2}\\.\\d{4})\\s+.*?(\\d{2}:\\d{2})\\s+(\\d{2}:\\d{2})/;\n    const bereitSectioRegex = /Bereitschaftsdienste/;\n\n    let inBereitschaftSection = false;\n\n    // --- Pass 1: Extract month/year and populate initial lists ---\n    for (const line of lines) {\n        // Find month and year first\n        if (!currentYear || !currentMonth) {\n            const monthYearMatch = line.match(monthYearRegex);\n            if (monthYearMatch) {\n                currentMonth = monthYearMatch[1];\n                currentYear = monthYearMatch[2];\n                console.log(`Found Year: ${currentYear}, Month: ${currentMonth}`);\n            }\n        }\n\n        // Check for section change\n        if (bereitSectioRegex.test(line)) {\n            inBereitschaftSection = true;\n            continue;\n        }\n\n        if (inBereitschaftSection) {\n            const onCallMatch = line.match(onCallBereitschaftRegex);\n            if (onCallMatch) {\n                const [_, dateStr, startTime, endTime] = onCallMatch;\n                const [day, month, year] = dateStr.split('.');\n                // Ensure year consistency if PDF spans year boundary (unlikely for monthly sheet)\n                const entryYear = year; // Use year from the line\n                const fullDate = `${entryYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;\n                bereitschaftEntries.push({ date: fullDate, start: startTime, end: endTime });\n            }\n        } else {\n            // Process main time log section (before Bereitschaftsdienste)\n            const shiftMatch = line.match(shiftRegex);\n            const vacationMatch = line.match(vacationRegex);\n            const holidayMatch = line.match(holidayRegex);\n\n            if (shiftMatch && currentYear && currentMonth) {\n                const [_, day, startTime, endTime] = shiftMatch;\n                const date = `${currentYear}-${currentMonth.padStart(2, '0')}-${day.padStart(2, '0')}`;\n                const timeKey = `${startTime}-${endTime}`;\n                const shiftType = shiftCodes[timeKey] || `⚠️ ${timeKey}`;\n                mainEntries.push({ type: shiftType, date: date, start: startTime, end: endTime });\n            } else if (vacationMatch && currentYear && currentMonth) {\n                const [_, day] = vacationMatch;\n                const date = `${currentYear}-${currentMonth.padStart(2, '0')}-${day.padStart(2, '0')}`;\n                mainEntries.push({ type: 'URLAUB', date: date, allDay: true });\n            } else if (holidayMatch && currentYear && currentMonth) {\n                const [_, day] = holidayMatch;\n                const date = `${currentYear}-${currentMonth.padStart(2, '0')}-${day.padStart(2, '0')}`;\n                mainEntries.push({ type: 'FEIERTAG', date: date, allDay: true });\n            }\n        }\n    }\n\n    if (!currentYear || !currentMonth) {\n        console.error(\"Could not determine month and year from PDF text.\");\n        return { entries: [], year: null, month: null };\n    }\n\n    // Log the raw extracted entries before processing\n    console.log(\"Raw Main Entries:\", JSON.stringify(mainEntries, null, 2));\n    console.log(\"Raw Bereitschaft Entries:\", JSON.stringify(bereitschaftEntries, null, 2));\n\n    // --- Pass 2: Process entries, handle merges, and build final list ---\n    const finalEntries = [];\n    const handledMainIndices = new Set();\n    const handledBereitschaftIndices = new Set();\n\n    // Prioritize finding B38 pairs and merging with M3\n    for (let i = 0; i < bereitschaftEntries.length; i++) {\n        if (handledBereitschaftIndices.has(i)) continue;\n\n        const item1 = bereitschaftEntries[i];\n\n        // Look for B38 start (19:50 - 00:00)\n        if (item1.start === '19:50' && item1.end === '00:00') {\n            // Search for the corresponding end part (00:00 - 07:35 on the next day)\n            for (let j = 0; j < bereitschaftEntries.length; j++) {\n                if (i === j || handledBereitschaftIndices.has(j)) continue;\n\n                const item2 = bereitschaftEntries[j];\n                if (item2.start === '00:00' && item2.end === '07:35') {\n                    // Check if dates are consecutive\n                    const startDateObj = new Date(item1.date);\n                    startDateObj.setDate(startDateObj.getDate() + 1);\n                    const endDateCheckObj = new Date(item2.date);\n\n                    if (startDateObj.toISOString().split('T')[0] === endDateCheckObj.toISOString().split('T')[0]) {\n                        // B38 pair found. Check for preceding M3.\n                        let merged = false;\n                        for (let m = 0; m < mainEntries.length; m++) {\n                            if (handledMainIndices.has(m)) continue;\n                            const mainEntry = mainEntries[m];\n                            if (mainEntry.type === 'M3' && mainEntry.date === item1.date) {\n                                // Merge found! Create MO entry.\n                                finalEntries.push({\n                                    type: 'MO',\n                                    date: item1.date, // Start date\n                                    start: '11:35',    // Fixed MO start\n                                    end: '07:35'     // Fixed MO end\n                                });\n                                console.log(`Merged M3 and B38 into MO for date: ${item1.date}`);\n                                handledMainIndices.add(m); // Mark M3 as handled\n                                handledBereitschaftIndices.add(i); // Mark B38 part 1 handled\n                                handledBereitschaftIndices.add(j); // Mark B38 part 2 handled\n                                merged = true;\n                                break; // Found M3, stop searching mainEntries\n                            }\n                        }\n\n                        if (!merged) {\n                            // No M3 found, create separate B38 entry\n                            finalEntries.push({\n                                type: 'B38',\n                                date: item1.date, // Start date\n                                start: '19:50',    // B38 start\n                                end: '07:35'     // B38 end\n                            });\n                            console.log(`Added separate B38 for date: ${item1.date} (no preceding M3)`);\n                            handledBereitschaftIndices.add(i); // Mark B38 part 1 handled\n                            handledBereitschaftIndices.add(j); // Mark B38 part 2 handled\n                        }\n                        // Whether merged or not, we've handled this B38 pair, break inner Bereitschaft loop\n                        break;\n                    }\n                }\n            }\n        }\n    }\n\n    // Add any unhandled main entries\n    for (let i = 0; i < mainEntries.length; i++) {\n        if (!handledMainIndices.has(i)) {\n            finalEntries.push(mainEntries[i]);\n        }\n    }\n\n    // Add any unhandled Bereitschaft entries (e.g., B36 or orphaned parts)\n    for (let i = 0; i < bereitschaftEntries.length; i++) {\n        if (!handledBereitschaftIndices.has(i)) {\n            const item = bereitschaftEntries[i];\n             // Check for B36\n             if (item.start === '07:35' && item.end === '19:35') {\n                 finalEntries.push({\n                     type: 'B36',\n                     date: item.date,\n                     start: item.start,\n                     end: item.end\n                 });\n                 console.log(`Added B36 for date: ${item.date}`);\n             } else {\n                 // Handle other orphans - log warning and add generically\n                 console.warn(`Orphaned/Unhandled Bereitschaft entry found: Date=${item.date}, Start=${item.start}, End=${item.end}. Adding as raw.`);\n                 finalEntries.push({\n                     type: `BEREIT_${item.start}-${item.end}`,\n                     date: item.date,\n                     start: item.start,\n                     end: item.end\n                 });\n             }\n             // Mark as handled to avoid adding again if logic expands\n             handledBereitschaftIndices.add(i);\n        }\n    }\n\n    // Sort final entries by date (optional, but good practice)\n    finalEntries.sort((a, b) => new Date(a.date) - new Date(b.date));\n\n\n    return { entries: finalEntries, year: currentYear, month: currentMonth };\n}\n\n\n// Helper function to format date and time for Google Calendar\nfunction formatForGoogleCalendar(entry, year, month) { // Takes year/month now\n    const timeZone = 'Europe/Berlin';\n    const workflowId = `dienstplan-${year}-${month.padStart(2, '0')}`; // Pad month here for ID\n\n    const eventBase = {\n        timeZone: timeZone,\n        extendedProperties: {\n            private: {\n                n8nWorkflowId: workflowId // Unique identifier\n            }\n        }\n    };\n\n    // Handle all-day events\n    if (entry.allDay) {\n        return {\n            ...eventBase,\n            summary: entry.type,\n            start: entry.date,\n            end: entry.date,\n        };\n    }\n\n    // Handle regular timed events\n    const fullDate = entry.date; // YYYY-MM-DD\n    let startDate = new Date(`${fullDate}T${entry.start}:00`); // Assume local time initially\n    let endDate = new Date(`${fullDate}T${entry.end}:00`);     // Assume local time initially\n\n    // Handle overnight shifts (B38, MO, or if end time is numerically <= start time)\n    // Note: B36 (07:35-19:35) does not cross midnight\n    if (entry.type === 'MO' || entry.type === 'B38' || (!entry.allDay && endDate <= startDate)) {\n         endDate.setDate(endDate.getDate() + 1);\n    }\n\n    // Construct summary\n    let summary = entry.type;\n    // Explicitly format MO summary, otherwise use standard format\n    if (entry.type === 'MO') {\n        summary = `MO 11:35-07:35`; // Use the defined MO times\n    } else if (entry.type === 'B38') {\n        summary = `B38 19:50-07:35`; // Use the defined B38 times\n    } else if (!entry.allDay) {\n        summary = `${entry.type} ${entry.start}-${entry.end}`;\n    }\n    // All-day summaries are just the type (handled above)\n\n\n    return {\n        ...eventBase,\n        summary: summary,\n        start: startDate.toISOString(), // Output UTC ISO string\n        end: endDate.toISOString(),     // Output UTC ISO string\n    };\n}\n\n// n8n integration:\nconsole.log(\"--- n8n Code Node Sync Logic Start (Revised Merge Logic) ---\");\n\n// Process all PDFs instead of just the first one\nconst results = items.map(item => {\n    const pdfData = item.json;\n    if (!pdfData || !pdfData.text) {\n        console.error(\"Error: pdfData or pdfData.text is missing or undefined.\");\n        return { json: { error: \"Invalid input data\" } };\n    }\n\n    const { entries: parsedEntries, year: currentYear, month: currentMonth } = parseTimeSheet(pdfData); // month is not padded here\n    if (!currentYear || !currentMonth) {\n        console.error(\"Failed to extract year or month. Cannot proceed.\");\n        return { json: { error: \"Could not extract year/month from PDF.\" } };\n    }\n\n    // Calculate start and end of the month for the search\n    const yearInt = parseInt(currentYear, 10);\n    const monthInt = parseInt(currentMonth, 10); // Month is 1-based from PDF\n    const startDateOfMonth = new Date(Date.UTC(yearInt, monthInt - 1, 1, 0, 0, 0));\n    const firstOfNextMonth = new Date(Date.UTC(yearInt, monthInt, 1, 0, 0, 0));\n    const startDateOfMonthISO = startDateOfMonth.toISOString();\n    const endDateOfMonthISO = firstOfNextMonth.toISOString();\n\n    // Define the property key and value for searching\n    const paddedMonth = currentMonth.padStart(2, '0');\n    const extendedPropertyKey = \"n8nWorkflowId\";\n    const extendedPropertyValue = `dienstplan-${currentYear}-${paddedMonth}`;\n    console.log(`Processing PDF for ${currentYear}-${paddedMonth}`);\n    console.log(`Search Property: ${extendedPropertyKey}=${extendedPropertyValue}`);\n    console.log(`Search Start Date: ${startDateOfMonthISO}`);\n    console.log(`Search End Date: ${endDateOfMonthISO}`);\n\n    // Format entries using the updated function\n    const eventsToCreate = parsedEntries.map(entry => formatForGoogleCalendar(entry, currentYear, currentMonth)); // Pass raw month\n    console.log(`Prepared ${eventsToCreate.length} events to potentially create (after merge).`);\n    console.log(\"Events:\", JSON.stringify(eventsToCreate, null, 2)); // Log the events being created\n\n    // Prepare the output object\n    return {\n        json: {\n            eventsToCreate: eventsToCreate,\n            startDateOfMonth: startDateOfMonthISO,\n            endDateOfMonth: endDateOfMonthISO,\n            extendedPropertyKey: extendedPropertyKey,\n            extendedPropertyValue: extendedPropertyValue,\n            year: currentYear,\n            month: paddedMonth\n        }\n    };\n});\n\nconsole.log(\"--- n8n Code Node Sync Logic End (Revised Merge Logic) ---\");\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5360,
+        5320
+      ],
+      "id": "e32d144a-4fda-4b5b-a536-221f629a24aa",
+      "name": "parseAndPrepare"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "eventsToCreate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        5580,
+        5420
+      ],
+      "id": "d04ca07e-9c67-4fc8-b892-1df48d9d3e0a",
+      "name": "extractEvents"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_DIENSTPLAN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Dienstplan"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $json.startDateOfMonth }}",
+        "timeMax": "={{ $json.endDateOfMonth }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        5580,
+        5220
+      ],
+      "id": "a9fcf03d-cc9d-4dca-903b-f65cca63fbcf",
+      "name": "searchExistingEvents"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_DIENSTPLAN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Dienstplan"
+        },
+        "eventId": "={{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        5800,
+        5220
+      ],
+      "id": "daa91e09-c5d3-4350-a216-a2e4ce50e737",
+      "name": "deleteExistingEvents"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        6020,
+        5220
+      ],
+      "id": "3fe69b48-8d16-4415-95db-ad9965cea530",
+      "name": "waitForDeletion"
+    },
+    {
+      "parameters": {
+        "content": "\nDieser Workflow verarbeitet **alle** Dienstplan-PDF-Dateien im Ordner `<<ABSOLUTE_FILE_PATH_REMOVED>> und synchronisiert die Einträge mit deinem Google Kalender (\"Dienstplan\").\n\n**Ablauf (Pro gefundener PDF):**\n1.  📄 Liest die `*.pdf`-Datei(en) aus dem Ordner `<<ABSOLUTE_FILE_PATH_REMOVED>>\n2.  ⚙️ Extrahiert den Text und parst die Dienste für den Monat **dieser spezifischen PDF**.\n3.  🔍 Sucht im Google Kalender **ALLE** Einträge für **diesen spezifischen Monat**.\n4.  🗑️ Löscht **ALLE** gefundenen alten Einträge **für diesen Monat**.\n5.  ➕ Erstellt die neuen Einträge aus **dieser PDF** im Kalender.\n\n**Wichtig:** Der Workflow führt Schritte 2-5 für jede gefundene PDF-Datei einzeln durch.\n\n**Datei für den Workflow bereitstellen:**\n*   Lege **alle** neuen Dienstplan-PDFs einfach in den Ordner `<<ABSOLUTE_FILE_PATH_REMOVED>> auf deinem n8n-Server.\n\n*(Doppelklick zum Bearbeiten | [n8n Sticky Notes Guide](https://docs.n8n.io/workflows/sticky-notes/))*",
+        "height": 500,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4700,
+        4780
+      ],
+      "id": "a8b9e9e1-f70f-4be8-9f3d-6f4dac4e0b8e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_DIENSTPLAN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Dienstplan"
+        },
+        "start": "={{ $json.start }}",
+        "end": "={{ $json.end }}",
+        "additionalFields": {
+          "summary": "={{ $json.summary }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        5800,
+        5420
+      ],
+      "id": "ddd98efb-3b13-4887-bf1d-399be98cf712",
+      "name": "createEvents"
+    },
+    {
+      "parameters": {
+        "content": "## 📅 Dienstplan -> Google Kalender Sync ✨\n",
+        "height": 880,
+        "width": 1500,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4660,
+        4720
+      ],
+      "id": "9832062d-c21e-446c-afaf-3faf1f33f081",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-04-21T19:59:21.000Z",
+  "versionId": "1b653719-0852-45f0-a519-dd162f0efb9c"
+}

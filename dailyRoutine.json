@@ -1,0 +1,725 @@
+{
+  "active": false,
+  "connections": {
+    "Merge Tasks & Checks": {
+      "main": [
+        [
+          {
+            "node": "Final Aggregate Data",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Feeds & GitHub": {
+      "main": [
+        [
+          {
+            "node": "Final Aggregate Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Calendars & Weather": {
+      "main": [
+        [
+          {
+            "node": "Final Aggregate Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On clicking 'execute'": {
+      "main": [
+        [
+          {
+            "node": "Get Daily Quote (API)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Daily Recipe Idea (RSS)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read RSS Feed 2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read RSS Feed 1 (Leipzig)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Weather Config",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Duty Roster Events (Today)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Fishing Events (Today)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Mails (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Daily Quote (API)": {
+      "main": [
+        [
+          {
+            "node": "Merge Tasks & Checks",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Format Summary for Discord": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Aggregate Data": {
+      "main": [
+        [
+          {
+            "node": "Format Summary for Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Daily Recipe Idea (RSS)": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds & GitHub",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Read RSS Feed 2": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds & GitHub",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Format Weather": {
+      "main": [
+        [
+          {
+            "node": "Merge Calendars & Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weather Config": {
+      "main": [
+        [
+          {
+            "node": "Zip to Coordinates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Duty Roster Events (Today)": {
+      "main": [
+        [
+          {
+            "node": "Merge Calendars & Weather",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Fishing Events (Today)": {
+      "main": [
+        [
+          {
+            "node": "Merge Calendars & Weather",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Daily Recipe Idea (RSS)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Weather Config",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Fishing Events (Today)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zip to Coordinates": {
+      "main": [
+        [
+          {
+            "node": "Get Weather Forecast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather Forecast": {
+      "main": [
+        [
+          {
+            "node": "Format Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read RSS Feed 1 (Leipzig)": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds & GitHub",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Check Mails (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "Check Critical Notifications (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Critical Notifications (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "Merge Tasks & Checks",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-04-23T20:56:12.077Z",
+  "id": "x8UtkyLyBLQbJbE7",
+  "meta": {},
+  "name": "dailyRoutine",
+  "nodes": [
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "id": "41fbc26b-ce22-401d-862a-3cd196f849ac",
+      "name": "Merge Tasks & Checks",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1100,
+        7140
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "id": "7ddba110-18c4-4f54-859a-4e1288fd487c",
+      "name": "Merge Feeds & GitHub",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1060,
+        5620
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "992bd6d4-66d1-482f-ad02-3518cb7d8102",
+      "name": "Merge Calendars & Weather",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1060,
+        4820
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "On clicking 'execute'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -1660,
+        5080
+      ],
+      "typeVersion": 1,
+      "id": "3a04117a-7833-4ba2-84b7-beb08a8809d1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.quotable.io/random",
+        "options": {}
+      },
+      "id": "3c80d5da-c908-470a-8b74-271274517b8b",
+      "name": "Get Daily Quote (API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        260,
+        7320
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "value": "<<YOUR_HOME_CHORES_CALENDAR_ID>>"
+        },
+        "timeMin": "={{ $now.startOf('day').toISO() }}",
+        "timeMax": "={{ $now.endOf('day').toISO() }}",
+        "options": {}
+      },
+      "id": "eefbca3e-8266-420e-b60e-e7767535dc41",
+      "name": "Check Trash Day (Chores Calendar)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        260,
+        5020
+      ],
+      "notesInFlow": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Node: Format Summary for Discord\n// Takes merged input data (weather, calendars, feeds, etc.)\n// and formats a summary string for Discord.\n\n// --- Helper Functions ---\n\n// Helper to get day name from date string (YYYY-MM-DD HH:MM:SS)\nconst getDayName = (dateString, locale = 'de-DE') => {\n    const date = new Date(dateString);\n    return date.toLocaleDateString(locale, { weekday: 'long' });\n};\n\n// Helper to get date part from date string\nconst getDatePart = (dateTimeString) => {\n    return dateTimeString.split(' ')[0]; // 'YYYY-MM-DD'\n}\n\n// Helper to format time (HH:MM)\nconst formatTime = (dateTimeString) => {\n    if (!dateTimeString) return '';\n    try {\n        const date = new Date(dateTimeString);\n        // Handle potential 'Z' for UTC in Google Calendar dates\n        if (dateTimeString.endsWith('Z')) {\n             // Adjust for local timezone if needed, assuming server runs in target timezone\n             // For simplicity, we format directly. Adjust if timezone issues arise.\n             return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }); // Example timezone\n        } else {\n            // Assume it's already in local time or correct offset\n             return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });\n        }\n    } catch (e) {\n        console.error(\"Error formatting time:\", dateTimeString, e);\n        return dateTimeString; // fallback\n    }\n};\n\n// Helper to get a weather emoji\nconst getWeatherEmoji = (mainCondition) => {\n    const condition = mainCondition?.toLowerCase() || '';\n    if (condition.includes('clear')) return '☀️';\n    if (condition.includes('clouds')) return '☁️';\n    if (condition.includes('rain')) return '🌧️';\n    if (condition.includes('drizzle')) return '🌦️';\n    if (condition.includes('thunderstorm')) return '⛈️';\n    if (condition.includes('snow')) return '❄️';\n    if (condition.includes('mist') || condition.includes('fog')) return '🌫️';\n    return '🌡️'; // Default\n};\n\n// --- Main Logic ---\n\n// Assume input items are in $input.all()\nconst items = $input.all();\nlet summaryParts = []; // Array to hold parts of the summary\n\n// Add initial greeting\nsummaryParts.push(`## Moin! Dein Tagesüberblick für ${new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} 🗓️`);\n\nlet weatherItems = [];\nlet dutyEvents = [];\nlet fishingEvents = [];\nlet choreEvents = []; // Assuming trash day is a 'chore'\nlet leipzigNews = [];\nlet recipeNews = [];\nlet otherRssItems = [];\nlet githubStatus = null;\nlet quote = null;\nlet githubNotifications = [];\n// Add other categories as needed (backup, gmail etc.)\n\n// 1. Categorize Input Items\nfor (const item of items) {\n    const data = item.json;\n\n    // Weather (identified by specific keys from Format Weather node)\n    if (data && data.dateTime && data.temp !== undefined && data.weatherMain) {\n        weatherItems.push(data);\n    }\n    // Google Calendar Events (identified by 'summary' and 'start.dateTime' or 'start.date')\n    else if (data && data.summary && (data.start?.dateTime || data.start?.date) && data.organizer?.email) {\n         // Differentiate calendars - This is brittle, relies on creator/organizer or keywords\n         // A better way would be to add a 'source' property *before* merging.\n         const summaryLower = data.summary.toLowerCase();\n         const organizerEmail = data.organizer.email;\n\n         // Crude check for calendar source - **IMPROVE THIS IF POSSIBLE**\n         if (organizerEmail?.includes('group.calendar.google.com')) { // Shared calendars\n             if (summaryLower.includes('dienstplan') || organizerEmail.includes('dienstplan') || data.organizer?.displayName?.toLowerCase().includes('dienstplan')) { // Check summary, email, or display name\n                 dutyEvents.push(data);\n             } else if (summaryLower.includes('angeln') || organizerEmail.includes('angeln')) { // Check ID/name if known\n                 fishingEvents.push(data);\n             } else if (summaryLower.includes('müll') || summaryLower.includes('tonne') || summaryLower.includes('abholung') || organizerEmail.includes('chores')) { // Keywords for chores\n                 choreEvents.push(data);\n             } else {\n                 // Fallback or classify as general calendar event if needed\n                 console.warn(\"Unknown Google Calendar event source:\", data.summary, organizerEmail);\n             }\n         } else {\n             // Potentially personal calendar events - ignore or handle if needed\n             console.log(\"Ignoring personal calendar event:\", data.summary);\n         }\n    }\n    // RSS Feed Items (identified by 'title', 'link', 'pubDate')\n    else if (data && data.title && data.link && data.pubDate) {\n        if (data.link.includes('leipzig.de')) {\n            leipzigNews.push(data);\n        } else if (data.link.includes('recipetineats.com')) {\n            recipeNews.push(data);\n        } else if (data.link.includes('githubstatus.com')) {\n            // Assume the first/most recent is the relevant status\n            if (!githubStatus) githubStatus = data;\n        } else {\n            otherRssItems.push(data); // Catch other potential RSS feeds\n        }\n    }\n    // Quote (identified by 'content' and 'author')\n    else if (data && data.content && data.author) {\n        quote = data;\n    }\n    // GitHub Notifications (identified by 'repository' and 'subject')\n    else if (data && data.repository && data.subject && data.reason) {\n        githubNotifications.push(data);\n    }\n    // Add checks for other data types: Backup Status (e.g., check for data.stdout), Gmail etc.\n    else {\n        console.log(\"Uncategorized item:\", JSON.stringify(data).substring(0, 200)); // Log unrecognized items\n    }\n}\n\n// 2. Process and Format Weather\nlet weatherSummary = \"### Wettervorhersage für Heute 🌦️\\n\";\nif (weatherItems.length > 0) {\n    // Iterate through the 3-hourly forecasts for today\n    for (const item of weatherItems) {\n        const time = formatTime(item.dateTime);\n        const temp = item.temp.toFixed(1);\n        const condition = item.weatherDescription;\n        const emoji = getWeatherEmoji(item.weatherMain);\n        const pop = item.pop.toFixed(0);\n\n        // Add a line for each time slot\n        weatherSummary += `- ${time}: ${emoji} ${temp}°C, ${condition} (Regen: ${pop}%)\\n`;\n    }\n\n} else {\n    weatherSummary += \"*Keine Wetterdaten für heute verfügbar.*\\n\";\n}\nsummaryParts.push(weatherSummary);\n\n\n// 3. Format Calendar Events\nlet calendarSummary = \"### Kalender 📅\\n\";\nlet calendarEntriesFound = false;\n\nif (dutyEvents.length > 0) {\n    calendarEntriesFound = true;\n    calendarSummary += \"**Dienstplan:**\\n\";\n    dutyEvents.forEach(event => {\n        // For duty events, only show the summary (title) as it usually contains the times\n        calendarSummary += `- ${event.summary}\\n`;\n    });\n}\nif (fishingEvents.length > 0) {\n    calendarEntriesFound = true;\n    calendarSummary += \"**Angeln:**\\n\";\n    fishingEvents.forEach(event => {\n        const startTime = formatTime(event.start?.dateTime || event.start?.date);\n        const endTime = event.end?.dateTime ? ` - ${formatTime(event.end.dateTime)}` : '';\n        calendarSummary += `- ${startTime}${endTime}: ${event.summary}\\n`;\n    });\n}\nif (choreEvents.length > 0) {\n     calendarEntriesFound = true;\n    calendarSummary += \"**Haushalt/Müll:**\\n\";\n    choreEvents.forEach(event => {\n        calendarSummary += `- ${event.summary}\\n`; // Typically all-day events\n    });\n}\n\nif (!calendarEntriesFound) {\n    calendarSummary += \"*Keine besonderen Termine heute.*\\n\";\n}\nsummaryParts.push(calendarSummary);\n\n// 4. Format News Feeds\nlet newsSummary = \"### Nachrichten & Updates 📰\\n\";\nlet newsFound = false;\n\nif (leipzigNews.length > 0) {\n    newsFound = true;\n    newsSummary += \"**Leipzig News (Neueste):**\\n\";\n    // Sort by date descending, take top 3\n    leipzigNews.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));\n    leipzigNews.slice(0, 3).forEach(item => {\n        newsSummary += `- [${item.title}](${item.link})\\n`;\n    });\n     newsSummary += \"\\n\";\n}\n\nif (recipeNews.length > 0) {\n    newsFound = true;\n    newsSummary += \"**Rezept-Idee des Tages: 🍳**\\n\";\n    // Take the first one (usually latest)\n    const recipe = recipeNews[0];\n    newsSummary += `- [${recipe.title}](${recipe.link})\\n`;\n     newsSummary += \"\\n\";\n}\n\n// Display other RSS feeds if needed\nif (otherRssItems.length > 0) {\n     newsFound = true;\n     newsSummary += \"**Weitere Feeds:**\\n\";\n     // Simple display, maybe group later if needed\n     otherRssItems.slice(0, 3).forEach(item => {\n         newsSummary += `- [${item.title}](${item.link})\\n`;\n     });\n      newsSummary += \"\\n\";\n}\n\nif (githubStatus) {\n     newsFound = true;\n    newsSummary += `**GitHub Status:** [${githubStatus.title}](${githubStatus.link})\\n`;\n}\n\nif (!newsFound) {\n    newsSummary += \"*Keine neuen Nachrichten oder Updates.*\\n\";\n}\nsummaryParts.push(newsSummary);\n\n\n// 5. Format Quote\nif (quote) {\n    let quoteSummary = `### Zitat des Tages 💬\\n_\"${quote.content}\"_\\n- ${quote.author}`;\n    summaryParts.push(quoteSummary);\n}\n\n// 6. Format GitHub Notifications (Optional - can be noisy)\n// if (githubNotifications.length > 0) {\n//     let githubSummary = `### GitHub Benachrichtigungen (${githubNotifications.length}) <0xF0><0x9F><0x9B><0xA0>️\\n`;\n//     // Add logic to maybe summarize or list a few important ones\n//     githubSummary += `*Du hast ${githubNotifications.length} neue Benachrichtigungen.*\\n\\n`\n// }\n\n// --- Final Output ---\n// Join all parts with double newlines for spacing in Discord\nconst finalSummary = summaryParts.join('\\n\\n');\n\n// Return the final summary string\nreturn [{ json: { discordMessage: finalSummary } }];\n"
+      },
+      "id": "6985e517-492e-4d08-9cbc-684a81b7cfe0",
+      "name": "Format Summary for Discord",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2120,
+        5340
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "f3aae3f8-9fb9-4244-b658-fb34cf9b3b38",
+      "name": "Final Aggregate Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1720,
+        5320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.recipetineats.com/feed/feed",
+        "options": {}
+      },
+      "id": "a97c90d9-3662-4fff-8c53-ed0628f51a6c",
+      "name": "Get Daily Recipe Idea (RSS)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        260,
+        5800
+      ]
+    },
+    {
+      "parameters": {
+        "url": "<<YOUR_RSS_FEED_URL_2>>",
+        "options": {}
+      },
+      "id": "1ad12e4c-77fb-41b2-b5b2-ee6081b3ddf0",
+      "name": "Read RSS Feed 2",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        260,
+        5620
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This script assumes the input JSON data from OpenWeatherMap \n// is available in the first input item's JSON property (e.g., items[0].json in n8n).\n// It extracts key weather details for each 3-hour forecast interval.\n\n// Get the input data (adjust based on your specific workflow tool, e.g., n8n)\n// Example for n8n: const weatherData = items[0].json;\n// For testing purposes, you might hardcode the JSON or pass it differently.\n// We'll assume 'weatherData' variable holds the input object.\n// If running directly in a node, you might need to assign items[0].json to weatherData.\nconst weatherData = items[0].json; // <<< Make sure this line correctly accesses your input data\n\n// Get today's date in YYYY-MM-DD format (in the server's local timezone)\nconst today = new Date().toLocaleDateString('sv-SE'); // sv-SE format is YYYY-MM-DD\n\nconst formattedForecasts = [];\n\nif (weatherData && weatherData.list && Array.isArray(weatherData.list)) {\n  for (const forecast of weatherData.list) {\n    // Check if the forecast date matches today's date\n    const forecastDate = forecast.dt_txt.substring(0, 10); // Extract YYYY-MM-DD\n\n    if (forecastDate === today) {\n      const formattedItem = {\n        // Raw timestamp\n        timestamp: forecast.dt,\n        // Formatted date/time string\n        dateTime: forecast.dt_txt,\n        // Main weather parameters\n        temp: forecast.main?.temp,\n        feelsLike: forecast.main?.feels_like,\n        tempMin: forecast.main?.temp_min,\n        tempMax: forecast.main?.temp_max,\n        pressure: forecast.main?.pressure,\n        humidity: forecast.main?.humidity,\n        // Weather description and icon\n        weatherMain: forecast.weather?.[0]?.main,\n        weatherDescription: forecast.weather?.[0]?.description,\n        weatherIcon: forecast.weather?.[0]?.icon,\n        // Cloudiness percentage\n        clouds: forecast.clouds?.all,\n        // Wind details\n        windSpeed: forecast.wind?.speed,\n        windDeg: forecast.wind?.deg,\n        windGust: forecast.wind?.gust,\n        // Visibility\n        visibility: forecast.visibility,\n        // Probability of Precipitation (converted to percentage)\n        pop: (forecast.pop ?? 0) * 100, \n        // Rain volume in the last 3 hours (default to 0 if not present)\n        rain3h: forecast.rain?.['3h'] ?? 0,\n        // Snow volume in the last 3 hours (default to 0 if not present)\n        snow3h: forecast.snow?.['3h'] ?? 0, \n        // Part of day (d = day, n = night)\n        partOfDay: forecast.sys?.pod,\n      };\n      formattedForecasts.push({ json: formattedItem }); // Wrap each item in {json: ...} for n8n standard output\n    }\n  }\n} else {\n  // Handle cases where input data is missing or not in the expected format\n  // Return an empty array or an error structure\n  return [{ json: { error: \"Invalid or missing weather data input.\", inputReceived: weatherData } }];\n}\n\n// Return the array of formatted forecast items. \n// Each item will become a separate output item in n8n.\nreturn formattedForecasts;\n"
+      },
+      "id": "59568a60-bd32-45a5-a316-30a50bab354d",
+      "name": "Format Weather",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        4220
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "plz",
+              "value": "04279"
+            },
+            {
+              "name": "OpenWeatherMapApiKey",
+              "value": "<<SET_OPENWEATHERMAPAPIKEY_REMOVED>>"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "de11bcd9-a7e1-406e-9568-a143ec442fe5",
+      "name": "Weather Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        260,
+        4220
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_DIENSTPLAN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Dienstplan"
+        },
+        "timeMin": "={{ $now.startOf('day').toISO() }}",
+        "timeMax": "={{ $now.endOf('day').toISO() }}",
+        "options": {}
+      },
+      "id": "0d54a821-af0c-4075-98fe-97be18baf004",
+      "name": "Get Duty Roster Events (Today)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        260,
+        4400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_ANGELN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Angeln"
+        },
+        "timeMin": "={{ $now.startOf('day').toISO() }}",
+        "timeMax": "={{ $now.endOf('day').toISO() }}",
+        "options": {}
+      },
+      "id": "cb31cd34-3e71-4d1b-b113-f9126fe3e1a2",
+      "name": "Get Fishing Events (Today)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        260,
+        4620
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5,
+              "triggerAtMinute": 50
+            }
+          ]
+        }
+      },
+      "id": "14cba4be-7cff-45e5-902c-a94303c1d876",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1660,
+        6720
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "<<DISCORD_GUILDID_RL_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "LeL",
+          "cachedResultUrl": "https://discord.com/channels/151414244603068426"
+        },
+        "sendTo": "user",
+        "userId": {
+          "__rl": true,
+          "value": "<<DISCORD_USERID_RL_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "fr4iser"
+        },
+        "content": "={{ $json.discordMessage }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2380,
+        5340
+      ],
+      "id": "8b752e35-127d-4411-9d82-699bf7971959",
+      "name": "Discord",
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openweathermap.org/geo/1.0/zip?zip={{ $json.plz }},DE&appid={{ $json.OpenWeatherMapApiKey }}",
+        "options": {}
+      },
+      "id": "e138fc01-a420-416d-bbea-73c281235bf9",
+      "name": "Zip to Coordinates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        480,
+        4220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openweathermap.org<<ABSOLUTE_FILE_PATH_REMOVED>> $json.lat }}&lon={{ $json.lon }}&appid={{ $('Weather Config').item.json.OpenWeatherMapApiKey }}&units=metric&lang=de",
+        "options": {}
+      },
+      "id": "4162f17a-1a55-4b85-b6bd-9691b152781b",
+      "name": "Get Weather Forecast",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        700,
+        4220
+      ]
+    },
+    {
+      "parameters": {
+        "command": "grep ERROR <<SSH_COMMAND_PATH_REMOVED>> || echo 'No backup errors'"
+      },
+      "id": "15b8e59b-682b-43dc-a042-cd64805fe027",
+      "name": "Check Backup Status (SSH)",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        980,
+        7860
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "id": "dba86069-8b37-49cf-a995-de147b281f7b",
+      "name": "Get GitHub Notifications",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        260,
+        5220
+      ],
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        8500
+      ],
+      "id": "ea7be9c8-37ab-4db2-8fb5-460367b1d065",
+      "name": "Check Package Status (Gmail)",
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        8260
+      ],
+      "id": "3bec1deb-7863-468f-bf1c-675ad838f091",
+      "name": "Check Mail Announcements (Gmail)",
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": "={{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        580,
+        7100
+      ],
+      "id": "f718933e-d15c-4ca0-a44e-22462c53d1dc",
+      "name": "Check Critical Notifications (Gmail)",
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1340,
+        7820
+      ],
+      "id": "547137d8-9935-4793-a6e9-680719500c9e",
+      "name": "Google Sheets"
+    },
+    {
+      "parameters": {
+        "url": "https://www.leipzig.de/newsfeed/rss.xml",
+        "options": {}
+      },
+      "id": "365ec5a8-890e-4137-a8a0-bcb81c59f60e",
+      "name": "Read RSS Feed 1 (Leipzig)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        260,
+        5420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "labelIds": [
+            "INBOX",
+            "UNREAD",
+            "<<GMAIL_LABEL_ID_REMOVED>>",
+            "<<GMAIL_LABEL_ID_REMOVED>>"
+          ],
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        360,
+        7100
+      ],
+      "id": "2bc5928c-4747-4181-9be0-10ca2cf067f0",
+      "name": "Check Mails (Gmail)",
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-04-25T18:18:44.000Z",
+  "versionId": "c413628b-7c22-42de-824d-9e8a80925de9"
+}

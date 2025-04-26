@@ -1,0 +1,443 @@
+{
+  "active": false,
+  "connections": {
+    "Start & Config": {
+      "main": [
+        [
+          {
+            "node": "Search Existing Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zip to Coordinates": {
+      "main": [
+        [
+          {
+            "node": "Get Weather Forecast",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather Forecast": {
+      "main": [
+        [
+          {
+            "node": "Filter Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Weather": {
+      "main": [
+        [
+          {
+            "node": "Bite Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duty Roster": {
+      "main": [
+        [
+          {
+            "node": "Filter Free Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Free Days": {
+      "main": [
+        [
+          {
+            "node": "Merge Weather & Free Days",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Weather & Free Days": {
+      "main": [
+        [
+          {
+            "node": "Create Fishing Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Existing Events": {
+      "main": [
+        [
+          {
+            "node": "Delete Existing Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Existing Events": {
+      "main": [
+        [
+          {
+            "node": "Check Duty Roster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bite Index": {
+      "main": [
+        [
+          {
+            "node": "Merge Weather & Free Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search Existing Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Zip to Coordinates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-04-23T05:04:08.378Z",
+  "id": "sjPpmOgyHUbBKKQT",
+  "meta": {},
+  "name": "Fishing Calendar",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "82c8555f-e884-4dfd-b0f6-8a59de5b58d2",
+      "name": "Start & Config",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        160,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openweathermap.org/geo/1.0/zip?zip={{ $json.plz }},DE&appid={{ $json.OpenWeatherMapApiKey }}",
+        "options": {}
+      },
+      "id": "4d147ce6-8c52-441e-9e57-97eae8f7ceae",
+      "name": "Zip to Coordinates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        600,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openweathermap.org<<ABSOLUTE_FILE_PATH_REMOVED>> $json.lat }}&lon={{ $json.lon }}&appid={{ $('Config').item.json.OpenWeatherMapApiKey }}&units=metric&lang=de",
+        "options": {}
+      },
+      "id": "91e07a05-7e4c-44b1-94ee-db8c53391dfd",
+      "name": "Get Weather Forecast",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        820,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Config from Config Node ---\n// This line was corrected: References 'Config' instead of 'Globals'\nconst config = $('Config').item.json;\nconst minTemp = config.minTemp;\nconst maxTemp = config.maxTemp;\nconst allowedConditionsInput = config.allowedConditions || 'Clear,Clouds';\nconst allowedList = allowedConditionsInput.split(',').map(s => s.trim().toLowerCase());\n\n// --- Forecast Data & City Info from Get Weather Forecast Node ---\n// Expects input to be the direct result of the OpenWeatherMap API call\nconst forecastData = $input.item.json;\nconst forecasts = forecastData.list || [];\nconst cityInfo = forecastData.city || {}; // Get city info for sunrise/sunset\nconst sunrise = cityInfo.sunrise; // Unix timestamp\nconst sunset = cityInfo.sunset; // Unix timestamp\n\nconst suitable = [];\nconst daysDone = new Set();\n\nconsole.log(`Filtering Weather: Temp=${minTemp}-${maxTemp}°C, Conditions=${allowedList.join(', ')}`);\n\nfor (const f of forecasts) {\n  const date = new Date(f.dt * 1000);\n  const day = date.toISOString().split('T')[0]; // YYYY-MM-DD\n  const hour = date.getHours();\n  const temp = f.main.temp;\n  const condition = (f.weather?.[0]?.main || '').toLowerCase();\n  const pressure = f.main.pressure;\n  const wind_speed = f.wind?.speed;\n  const wind_deg = f.wind?.deg;\n\n  if (daysDone.has(day)) continue;\n  if (hour < 8 || hour >= 18) continue; // Only daytime (8 AM to 5:59 PM)\n  if (temp < minTemp || temp > maxTemp) continue; // Check temperature\n  if (!allowedList.includes(condition)) continue; // Check weather condition\n\n  console.log(`--> Suitable slot found for day ${day} at ${date.toISOString()}`);\n  suitable.push({\n    json: { // Return extended data for each suitable slot\n      date: day,\n      dt: f.dt, // Unix timestamp for the specific forecast slot\n      temp,\n      condition: f.weather?.[0]?.description || condition,\n      pressure,\n      wind_speed,\n      wind_deg,\n      sunrise, // Include sunrise/sunset from city info\n      sunset\n    }\n  });\n  daysDone.add(day); // Mark day as processed\n}\n\nconsole.log(`Found ${suitable.length} suitable day(s) based on weather.`);\nreturn suitable; // Return array of suitable slots with extended data"
+      },
+      "id": "49346fa2-15c3-4774-8ccf-7e85cf898014",
+      "name": "Filter Weather",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_DIENSTPLAN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Dienstplan"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "bc9cbdb5-7532-4444-a541-b7f1b58676d6",
+      "name": "Check Duty Roster",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        820,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_ANGELN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Angeln"
+        },
+        "start": "={{ $json.date }}",
+        "end": "={{ $json.date }}",
+        "additionalFields": {
+          "description": "={{ `Weather: ${$json.condition}, ${$json.temp}°C - Suggestion based on free day` }}",
+          "summary": "={{ `Bite Index: ${$json.beissindex}/10 | Weather: ${$json.condition}, ${$json.temp}°C` }}"
+        }
+      },
+      "id": "1c898909-19b3-417f-8577-70504c952fc4",
+      "name": "Create Fishing Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// This code processes calendar events to find free days.\n\n// --- Get Calendar Events ---\n// Input 0: Calendar events from Check Duty Roster\nconst calendarEventItems = items; \nconsole.log(`Received ${calendarEventItems.length} calendar event items.`);\n\n// --- Define Date Range (Next 14 days) ---\nconst startDate = new Date();\nstartDate.setHours(0, 0, 0, 0); // Start of today\nconst endDate = new Date(startDate);\nendDate.setDate(startDate.getDate() + 14); // End of the 14th day\nconsole.log(`Checking for free days between ${startDate.toISOString().split('T')[0]} and ${endDate.toISOString().split('T')[0]}`);\n\n// --- Create Set of Occupied Dates ---\nconst occupiedDates = new Set();\nfor (const eventItem of calendarEventItems) {\n  if (!eventItem || !eventItem.json || !eventItem.json.start) {\n    console.warn(\"Skipping invalid calendar event item:\", eventItem);\n    continue;\n  }\n  const event = eventItem.json;\n  const eventDateString = event.start.date || event.start.dateTime;\n  if (!eventDateString) {\n     console.warn(\"Skipping calendar event item with missing date/dateTime:\", event);\n     continue;\n  }\n  const eventDate = eventDateString.substring(0, 10); // YYYY-MM-DD\n  occupiedDates.add(eventDate);\n}\nconsole.log(`Found ${occupiedDates.size} unique occupied dates in the fetched range.`);\n\n// --- Find Free Dates in Range ---\nconst freeDays = [];\nlet currentDate = new Date(startDate);\n\nwhile (currentDate < endDate) {\n  const currentDateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD\n  if (!occupiedDates.has(currentDateStr)) {\n    console.log(`--> Day ${currentDateStr} is free.`);\n    freeDays.push({ json: { freeDate: currentDateStr } });\n  }\n  // Move to the next day\n  currentDate.setDate(currentDate.getDate() + 1);\n}\n\nconsole.log(`Identified ${freeDays.length} free days in the next 14 days.`);\n\n// Return array of free dates\nreturn freeDays;"
+      },
+      "id": "a0554f6d-6cff-47fc-bbc8-3f73538be207",
+      "name": "Filter Free Days",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "date",
+              "field2": "freeDate"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1480,
+        520
+      ],
+      "id": "4bd97430-54c0-4abc-a090-c51477d08c1d",
+      "name": "Merge Weather & Free Days"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_ANGELN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Angeln"
+        },
+        "returnAll": true,
+        "timeMin": "={{ new Date().toISOString() }}",
+        "timeMax": "={{ new Date(new Date().setDate(new Date().getDate() + 14)).toISOString() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        380,
+        620
+      ],
+      "id": "8b5fe505-51ff-4f47-901d-7f88bf1ed147",
+      "name": "Search Existing Events",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "<<GOOGLE_CALENDAR_ID_FOR_ANGELN_REMOVED>>",
+          "mode": "list",
+          "cachedResultName": "Angeln"
+        },
+        "eventId": "={{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        620
+      ],
+      "id": "4b2ea53b-b2c1-4ba1-bd47-ccdcd17c0c8b",
+      "name": "Delete Existing Events",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "**🎣 Fishing Calendar - Configuration 🎣**\n\n📌 **Important Steps:**\n\n1.  **Config Node:**\n    *   Replace \"YOUR_OPENWEATHERMAP_API_KEY\" with your actual OpenWeatherMap API Key.\n    *   Adjust ZIP code (plz), temperature (minTemp, maxTemp), and allowed weather conditions (allowedConditions) if needed.\n\n2.  **Google Calendar Nodes:**\n    *   Select your Google Calendar **Credentials**.\n    *   Replace \"YOUR_DIENSTPLAN_CALENDAR_ID@...\" with the ID of your Duty Roster calendar.\n    *   Replace \"YOUR_ANGELN_CALENDAR_ID@...\" with the ID of your Fishing calendar.",
+        "height": 820,
+        "width": 1960,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cd6bc92d-9794-4808-8c01-e1df88bc66fa",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This script calculates a simple fishing bite index based on weather data.\n// Input: Expects an array of items, each item.json contains weather data for a suitable slot\n// from the Filter Weather node (including dt, pressure, wind_speed, sunrise, sunset).\n// Output: Returns the input array, with an added 'beissindex' (0-10) property in each item.json.\n\nfunction calculateBiteIndex(weatherItems) {\n  if (!weatherItems || weatherItems.length === 0) {\n    console.log(\"No weather items received to calculate Bite Index.\");\n    return [];\n  }\n\n  for (const item of weatherItems) {\n    const data = item.json;\n    let score = 5; // Start with a baseline score\n\n    // Simple heuristic checks - adjust points as needed\n    console.log(`Calculating index for date: ${data.date}, time: ${new Date(data.dt * 1000).toISOString()}`);\n\n    // 1. Pressure Check\n    const pressure = data.pressure;\n    if (pressure) {\n        if (pressure >= 1010 && pressure <= 1022) score += 1; // Stable 'normal' pressure\n        else if (pressure < 1005 || pressure > 1028) score -= 1; // Very low or high pressure often less ideal\n        console.log(`  - Pressure (${pressure} hPa): Score adjusted to ${score}`);\n    }\n\n    // 2. Wind Speed Check (m/s)\n    const windSpeed = data.wind_speed;\n    if (windSpeed !== undefined) {\n        if (windSpeed > 1.5 && windSpeed < 7) score += 1; // Light to moderate breeze often good (approx 5-25 km/h)\n        else if (windSpeed >= 7) score -= 1; // Strong wind often less ideal\n        console.log(`  - Wind Speed (${windSpeed} m/s): Score adjusted to ${score}`);\n    }\n\n    // 3. Time of Day Check (relative to sunrise/sunset)\n    const dt = data.dt;\n    const sunrise = data.sunrise;\n    const sunset = data.sunset;\n    if (dt && sunrise && sunset) {\n        const hoursAfterSunrise = (dt - sunrise) / 3600;\n        const hoursBeforeSunset = (sunset - dt) / 3600;\n        // Check if within ~2 hours of sunrise or sunset\n        if ((hoursAfterSunrise >= -0.5 && hoursAfterSunrise <= 2) || (hoursBeforeSunset >= -0.5 && hoursBeforeSunset <= 2)) {\n            score += 2; // Prime bite times\n            console.log(`  - Time (Dawn/Dusk): Score adjusted to ${score}`);\n        }\n    }\n\n    // 4. Weather Condition (already filtered, but cloudy/overcast is often preferred)\n    const conditionDesc = (data.condition || '').toLowerCase();\n    if (conditionDesc.includes('cloud') || conditionDesc.includes('overcast') || conditionDesc.includes('mist') || conditionDesc.includes('fog') || conditionDesc.includes('drizzle')) {\n      score += 1; // Slightly favor overcast/low light\n      console.log(`  - Condition (${conditionDesc}): Score adjusted to ${score}`);\n    }\n\n    // Normalize score to 0-10 range\n    score = Math.max(0, Math.min(10, Math.round(score)));\n    console.log(`  - Final Score: ${score}/10`);\n\n    item.json.beissindex = score;\n  }\n\n  return weatherItems;\n}\n\n// Assuming the input comes directly from the previous node's items\nconst inputItems = items; \nreturn calculateBiteIndex(inputItems);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        420
+      ],
+      "id": "8286752e-6023-4000-a909-388ca5a70c71",
+      "name": "Bite Index"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        660
+      ],
+      "id": "4cebd169-1a0c-49bf-9137-c78c1ac6af3a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "plz",
+              "value": "04279"
+            },
+            {
+              "name": "OpenWeatherMapApiKey",
+              "value": "<<SET_OPENWEATHERMAPAPIKEY_REMOVED>>"
+            },
+            {
+              "name": "minTemp",
+              "value": "0"
+            },
+            {
+              "name": "maxTemp",
+              "value": "30"
+            },
+            {
+              "name": "allowedConditions",
+              "value": "Clear,Clouds,Mist,Drizzle"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        380,
+        420
+      ],
+      "typeVersion": 1,
+      "id": "463435ef-6cf2-4156-a229-3a12416d7943"
+    }
+  ],
+  "pinData": {
+    "Start & Config": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      },
+      {
+        "json": {
+          "name": "Second item",
+          "code": 2
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-04-24T19:24:48.000Z",
+  "versionId": "e2a175a7-7ac0-41cc-b9ee-6adccb67d714"
+}

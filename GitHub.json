@@ -1,0 +1,470 @@
+{
+  "active": false,
+  "connections": {
+    "On clicking 'execute'": {
+      "main": [
+        [
+          {
+            "node": "Globals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "isDiffOrNew",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "github_status": {
+      "main": [
+        [
+          {
+            "node": "same",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "different",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "new",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "same": {
+      "main": [
+        [
+          {
+            "node": "OneAtATime",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "different": {
+      "main": [
+        [
+          {
+            "node": "GitHub Edit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "new": {
+      "main": [
+        [
+          {
+            "node": "GitHub Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub Edit": {
+      "main": [
+        []
+      ]
+    },
+    "GitHub Create": {
+      "main": [
+        [
+          {
+            "node": "OneAtATime",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "isDiffOrNew": {
+      "main": [
+        [
+          {
+            "node": "github_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily @ 20:00": {
+      "main": [
+        [
+          {
+            "node": "Globals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OneAtATime": {
+      "main": [
+        [
+          {
+            "node": "GitHub",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sanitize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Globals": {
+      "main": [
+        [
+          {
+            "node": "n8n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "n8n": {
+      "main": [
+        [
+          {
+            "node": "OneAtATime",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitize": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-04-21T18:34:56.862Z",
+  "id": "WVyO1w1cEYQM8QyI",
+  "meta": {},
+  "name": "GitHub",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "On clicking 'execute'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -800,
+        60
+      ],
+      "typeVersion": 1,
+      "id": "78dfeabb-de24-4d11-9f1a-429be3930ac3"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/fr4iser90/n8n-workflows"
+        },
+        "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$json[\"name\"]}}.json",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "name": "GitHub",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        80,
+        -75.5
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "id": "f6b4f80e-30b3-4f1d-a083-e3e292d23a2b",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        300,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "6d273944-c576-4c9d-aa6f-01c1e87b173f"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json[\"github_status\"]}}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "same"
+            },
+            {
+              "value2": "different",
+              "output": 1
+            },
+            {
+              "value2": "new",
+              "output": 2
+            }
+          ]
+        }
+      },
+      "name": "github_status",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        740,
+        -61
+      ],
+      "typeVersion": 1,
+      "id": "e22cad40-71bc-42e4-a201-7920dff20931"
+    },
+    {
+      "parameters": {},
+      "name": "same",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        960,
+        -140
+      ],
+      "typeVersion": 1,
+      "id": "96047e7f-165c-4f22-9579-96221545d0fc"
+    },
+    {
+      "parameters": {},
+      "name": "different",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        960,
+        60
+      ],
+      "typeVersion": 1,
+      "id": "edf924b3-cab8-40eb-aaa4-928deebc6bad"
+    },
+    {
+      "parameters": {},
+      "name": "new",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        960,
+        285
+      ],
+      "typeVersion": 1,
+      "id": "732ba73e-3d52-4f6f-a378-9b4c74a5e37c"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+        "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+        "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$json[\"workflowName\"]}}.json",
+        "fileContent": "={{$node[\"isDiffOrNew\"].json[\"n8n_data_stringy\"]}}",
+        "commitMessage": "=[N8N Backup] {{$json[\"workflowName\"]}}.json ({{$json[\"github_status\"]}})"
+      },
+      "name": "GitHub Edit",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        1180,
+        60
+      ],
+      "typeVersion": 1,
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "id": "50164d2d-97e9-40c8-8942-eb056f8852e8"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": "={{$node[\"Globals\"].json[\"repo\"][\"owner\"]}}",
+        "repository": "={{$node[\"Globals\"].json[\"repo\"][\"name\"]}}",
+        "filePath": "={{$node[\"Globals\"].json[\"repo\"][\"path\"]}}{{$json[\"workflowName\"]}}.json",
+        "fileContent": "={{$node[\"isDiffOrNew\"].json[\"n8n_data_stringy\"]}}",
+        "commitMessage": "=[N8N Backup] {{$json[\"workflowName\"]}}.json ({{$json[\"github_status\"]}})"
+      },
+      "name": "GitHub Create",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        1180,
+        385
+      ],
+      "typeVersion": 1,
+      "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
+      "id": "98d17ba4-2bb9-4ff9-a301-dac4e2793aa1"
+    },
+    {
+      "parameters": {
+        "functionCode": "// isDiffOrNew.js - Defensive Version 3\n\n// Initialize the object that will eventually be returned\nlet resultItem = { json: {} }; // Start with an empty json object\n\n// --- Get GitHub Data (items[0]) ---\nlet githubData = null;\nif (items[0] && items[0].json) {\n  githubData = items[0].json;\n  // Copy over initial GitHub data/error to resultItem for context\n  Object.assign(resultItem.json, githubData);\n} else {\n  console.error(\"Input item from GitHub (items[0]) is missing or has no json property.\");\n  resultItem.json.github_status = \"error_missing_github_input\";\n  // Attempt to process n8n data anyway for a 'new' push? Or just return error?\n  // Let's try to continue and see if we can determine 'new' status.\n}\n\n// --- Get Sanitized n8n Data (items[1]) ---\nlet n8nWorkflow = null;\nif (items[1] && items[1].json && typeof items[1].json === 'object' && items[1].json !== null) {\n  n8nWorkflow = items[1].json; // Direct access assumed after sanitize node update\n} else {\n  console.error(\"Input item from Sanitize (items[1]) is missing, has no json, or json is not a valid object.\");\n  resultItem.json.github_status = resultItem.json.github_status || \"error_missing_n8n_input\"; // Keep previous error if any\n  // Can't proceed without n8n data\n  return [resultItem];\n}\n\n// --- Extract Workflow Name ---\n// Safely try to get the workflow name and add it to the result\nif (n8nWorkflow && n8nWorkflow.name) {\n  resultItem.json.workflowName = n8nWorkflow.name; // ADDED workflowName\n} else {\n  console.warn(\"Could not find workflow name in sanitized n8n data. Using fallback name.\");\n  resultItem.json.workflowName = `workflow_${n8nWorkflow.id || 'unknown'}`; // Fallback name using ID\n}\n\n// --- Determine Status (Compare or New) ---\n\n// CASE 1: GitHub file exists (has 'content')\nif (githubData && typeof githubData.content === 'string') {\n  let origWorkflow;\n  try {\n    origWorkflow = JSON.parse(Buffer.from(githubData.content, 'base64').toString());\n    if (typeof origWorkflow !== 'object' || origWorkflow === null) {\n       throw new Error(\"Parsed GitHub content is not an object.\");\n    }\n\n    // --- Order and Compare ---\n    var orderedOriginal = {};\n    var orderedActual = {}; // Will hold ordered n8n data\n\n    Object.keys(origWorkflow).sort().forEach(function(key) {\n      orderedOriginal[key] = origWorkflow[key];\n    });\n\n    // Check n8nWorkflow again before keys (should be object from above)\n    if (typeof n8nWorkflow !== 'object' || n8nWorkflow === null) {\n       throw new Error(\"n8nWorkflow became invalid before comparison keys.\");\n    }\n    Object.keys(n8nWorkflow).sort().forEach(function(key) {\n      orderedActual[key] = n8nWorkflow[key];\n    });\n\n    // Perform comparison\n    if (JSON.stringify(orderedOriginal) === JSON.stringify(orderedActual)) {\n      resultItem.json.github_status = \"same\";\n      // No need for n8n_data_stringy if same\n      delete resultItem.json.n8n_data_stringy;\n      resultItem.json.content_decoded = orderedOriginal; // Optional: keep decoded original\n    } else {\n      resultItem.json.github_status = \"different\";\n      resultItem.json.n8n_data_stringy = JSON.stringify(orderedActual, null, 2); // Stringify the ordered n8n data\n      resultItem.json.content_decoded = orderedOriginal; // Optional: keep decoded original\n    }\n\n  } catch (e) {\n    console.error(\"Error during GitHub content parsing or comparison:\", e);\n    resultItem.json.github_status = \"error_comparing\";\n    // If comparison fails, maybe still push the sanitized n8n data?\n    try {\n        if (typeof n8nWorkflow === 'object' && n8nWorkflow !== null) {\n            var orderedActualOnError = {};\n             Object.keys(n8nWorkflow).sort().forEach(function(key) { orderedActualOnError[key] = n8nWorkflow[key]; });\n             resultItem.json.n8n_data_stringy = JSON.stringify(orderedActualOnError, null, 2);\n        } else {\n             delete resultItem.json.n8n_data_stringy;\n        }\n    } catch (stringifyError) {\n        console.error(\"Error stringifying n8n data even after comparison error:\", stringifyError);\n         delete resultItem.json.n8n_data_stringy;\n    }\n  }\n\n// CASE 2: GitHub file does NOT exist (no 'content' in githubData or githubData itself was null)\n} else {\n  console.log(\"GitHub file not found or no content key. Processing as 'new'.\");\n  try {\n    // Check n8nWorkflow again (should be object from above)\n     if (typeof n8nWorkflow !== 'object' || n8nWorkflow === null) {\n       throw new Error(\"n8nWorkflow is invalid for 'new' file processing.\");\n    }\n\n    var orderedActualNew = {};\n    Object.keys(n8nWorkflow).sort().forEach(function(key) {\n      orderedActualNew[key] = n8nWorkflow[key];\n    });\n\n    resultItem.json.github_status = \"new\";\n    resultItem.json.n8n_data_stringy = JSON.stringify(orderedActualNew, null, 2); // Stringify the ordered n8n data\n\n  } catch (e) {\n    console.error(\"Error during processing for 'new' file:\", e);\n    resultItem.json.github_status = \"error_processing_new\";\n    delete resultItem.json.n8n_data_stringy; // Don't include potentially corrupt data\n  }\n}\n\n// Return the single result item\nreturn [resultItem];"
+      },
+      "name": "isDiffOrNew",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        520,
+        -40
+      ],
+      "typeVersion": 1,
+      "id": "cc58eded-7850-452e-bb1c-3f883e885170"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 20,
+              "minute": 11
+            }
+          ]
+        }
+      },
+      "name": "Daily @ 20:00",
+      "type": "n8n-nodes-base.cron",
+      "position": [
+        -800,
+        260
+      ],
+      "typeVersion": 1,
+      "id": "b9a34565-55b4-4b84-8251-708679b6c5be"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "OneAtATime",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -140,
+        85
+      ],
+      "typeVersion": 1,
+      "id": "f4de7a1b-643d-4b6e-88bb-69dcb2ae11d8"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "repo.owner",
+              "value": "fr4iser90"
+            },
+            {
+              "name": "repo.name",
+              "value": "n8n-workflows"
+            },
+            {
+              "name": "repo.path"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Globals",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -580,
+        85
+      ],
+      "typeVersion": 1,
+      "id": "e75c7a65-0e3c-47ea-9086-50da68e141a8"
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        85
+      ],
+      "id": "c2e654bb-ab02-4620-8042-8e69f608d751",
+      "name": "n8n"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Sanitize.js - More Dynamic Version\n\n// --- Configuration ---\n// List of sensitive SUBSTRINGS (lowercase) to detect within parameter keys recursively\nconst SENSITIVE_SUBSTRINGS = [\n    'key',       // Catches apikey, secretkey, privatekey, etc.\n    'token',     // Catches apitoken, accesstoken, refreshtoken, etc.\n    'secret',    // Catches clientsecret, etc.\n    'password', 'pass' // Catches password, dbpassword, etc.\n    // Add more generic substrings if needed, but be careful not to be too broad\n];\n\n// List of sensitive keys directly on the node object (outside parameters)\nconst SENSITIVE_NODE_KEYS = [\n    'webhookId' // Add others if needed, e.g., 'botToken'\n];\n\n// Regex patterns for sensitive string values\nconst PATTERNS = {\n    PRIVATE_IP: /(?:(?:\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b(?:[:\\/\\?]|$))|(?:\\b(?:10\\.(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){2}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|172\\.(?:1[6-9]|2[0-9]|3[0-1])\\.(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){1}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|192\\.168\\.(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){1}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\\b(?:[:\\/\\?]|$)))/g,\n    GSHEET_ID: /(?:\\/d\\/|value=)([a-zA-Z0-9_-]{40,})/g, // Google Sheet ID (long alphanumeric)\n    ABS_PATH: /(\\/data\\/|\\/home\\/|\\/Users\\/|\\/mnt\\/|\\/media\\/|\\/var\\/log\\/|C:\\\\Users\\\\|C:\\\\Program Files\\\\)[^\\'\"\\s\\<]+/g, // Absolute Paths (common OS roots, avoiding already sanitized)\n    WEBHOOK_URL: /(https?:\\/\\/[^\\s\\'\\\"]*(\\/webhook\\/|\\/webhook-test\\/)[^\\s\\'\\\"]*)/gi, // URLs with /webhook/ or /webhook-test/\n    EMAIL: /(['\\\"]?)([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})(['\\\"]?)/g, // Email addresses (basic)\n    GOOGLE_CALENDAR_ID_PATTERN: /(@group\\.calendar\\.google\\.com|@import\\.calendar\\.google\\.com|\\.calendar\\.google\\.com)/ // Specific check for calendar IDs\n};\n\nconst MAX_RECURSION_DEPTH = 10; // Prevent infinite loops in circular structures\n\n// --- Helper Functions ---\n\n/**\n * Recursively sanitizes an object or array based on key substrings and value patterns.\n * @param {any} data - The object or array to sanitize.\n * @param {string} parentKey - The key of the parent object holding this data.\n * @param {number} currentDepth - The current recursion depth.\n * @returns {any} The sanitized data.\n */\nfunction sanitizeObjectRecursive(data, parentKey = '', currentDepth = 0) {\n    if (currentDepth > MAX_RECURSION_DEPTH) return data;\n\n    if (Array.isArray(data)) {\n        return data.map(item => sanitizeObjectRecursive(item, parentKey, currentDepth + 1));\n    } else if (data !== null && typeof data === 'object') {\n\n        // Handle Set Node Structure specifically first\n        if (parentKey === 'values' && data.string && Array.isArray(data.string)) {\n            const sanitizedStrings = data.string.map(item => {\n                let newItem = { ...item }; // Clone item\n                if (newItem && newItem.name && typeof newItem.value === 'string' && !newItem.value.startsWith('<<')) {\n                    const lowerName = newItem.name.toLowerCase();\n                    // Check if item name contains sensitive substring\n                    if (SENSITIVE_SUBSTRINGS.some(sub => lowerName.includes(sub))) {\n                        newItem.value = `<<SET_${newItem.name.toUpperCase()}_REMOVED>>`;\n                    } else {\n                         // If key not sensitive, still check value pattern\n                         newItem.value = sanitizeStringValueByPattern(newItem.value);\n                    }\n                }\n                return newItem;\n            });\n            return { ...data, string: sanitizedStrings };\n        }\n\n        // Default Object Handling\n        const sanitizedObj = {};\n        for (const key in data) {\n            if (data.hasOwnProperty(key)) {\n                const lowerKey = key.toLowerCase();\n                const value = data[key];\n                let processedValue = null;\n\n                // 1. Check if the key contains a sensitive substring\n                if (SENSITIVE_SUBSTRINGS.some(sub => lowerKey.includes(sub))) {\n                    if (typeof value === 'string' && value.length > 3 && !value.startsWith('<<')) {\n                        processedValue = `<<${key.toUpperCase()}_REMOVED>>`;\n                    } else if (typeof value === 'object' && value !== null && value.hasOwnProperty('value') && typeof value.value === 'string' && value.value.length > 3 && !value.value.startsWith('<<')) {\n                        processedValue = { ...value, value: `<<${key.toUpperCase()}_RL_REMOVED>>` };\n                    }\n                    // Add handling for other types (like numbers?) if needed, though unlikely for keys\n                }\n\n                // 2. If not processed by key check, sanitize value based on type\n                if (processedValue === null) {\n                    if (typeof value === 'string' && !value.startsWith('<<')) {\n                        processedValue = sanitizeStringValueByPattern(value);\n                        // If pattern didn't modify, keep original for potential recursion\n                        if (processedValue === value) processedValue = null;\n                    } else if (typeof value === 'object' && value !== null) {\n                        processedValue = sanitizeObjectRecursive(value, key, currentDepth + 1);\n                    }\n                }\n\n                sanitizedObj[key] = processedValue !== null ? processedValue : value;\n            }\n        }\n        return sanitizedObj;\n    } else {\n        return data;\n    }\n}\n\n/**\n * Applies predefined regex patterns to sanitize a string value.\n * @param {string} value The string to sanitize.\n * @returns {string} The sanitized string or the original if no patterns matched.\n */\nfunction sanitizeStringValueByPattern(value) {\n    if (typeof value !== 'string' || value.startsWith('<<')) return value;\n\n    let sanitizedValue = value;\n    let modified = false;\n\n    const skipEmailPattern = PATTERNS.GOOGLE_CALENDAR_ID_PATTERN.test(value);\n\n    if (PATTERNS.PRIVATE_IP.test(sanitizedValue)) {\n        PATTERNS.PRIVATE_IP.lastIndex = 0;\n        sanitizedValue = sanitizedValue.replace(PATTERNS.PRIVATE_IP, '<<PRIVATE_IP_REMOVED>>');\n        modified = true;\n    }\n    if (PATTERNS.GSHEET_ID.test(sanitizedValue)) {\n        PATTERNS.GSHEET_ID.lastIndex = 0;\n        sanitizedValue = sanitizedValue.replace(PATTERNS.GSHEET_ID, (match, p1) => match.replace(p1, '<<GOOGLE_SHEET_ID_REMOVED>>'));\n        modified = true;\n    }\n    if (PATTERNS.ABS_PATH.test(sanitizedValue)) {\n        PATTERNS.ABS_PATH.lastIndex = 0;\n        sanitizedValue = sanitizedValue.replace(PATTERNS.ABS_PATH, '<<ABSOLUTE_FILE_PATH_REMOVED>>');\n        modified = true;\n    }\n    if (PATTERNS.WEBHOOK_URL.test(sanitizedValue)) {\n        PATTERNS.WEBHOOK_URL.lastIndex = 0;\n        sanitizedValue = sanitizedValue.replace(PATTERNS.WEBHOOK_URL, '<<WEBHOOK_URL_REMOVED>>');\n        modified = true;\n    }\n    if (!skipEmailPattern && PATTERNS.EMAIL.test(sanitizedValue) && sanitizedValue.includes('@') && sanitizedValue.includes('.') && !sanitizedValue.includes('://')) {\n        PATTERNS.EMAIL.lastIndex = 0;\n        sanitizedValue = sanitizedValue.replace(PATTERNS.EMAIL, (match, p1, p2, p3) => `${p1||''}<<EMAIL_REMOVED>>${p3||''}`);\n        modified = true;\n    }\n\n    return modified ? sanitizedValue : value;\n}\n\n/**\n * Sanitizes jsCode within Code/Function nodes.\n * @param {string} code - The original JavaScript code.\n * @returns {string} The sanitized code.\n */\nfunction sanitizeJsCode(code) {\n    if (typeof code !== 'string') return code;\n\n    let modifiedCode = code;\n    let sanitized = false;\n\n    const keyPattern = /(api[_-]?key|secret|token|password|pass)(\\s*[:=]\\s*['\\\"])([^'\\\"\\s]+)(['\\\"])/gi;\n    modifiedCode = modifiedCode.replace(keyPattern, (match, keyName, prefix, originalValue, suffix) => {\n        if (!originalValue.startsWith('<<') && originalValue.length > 5) {\n            sanitized = true;\n            return `${keyName}${prefix}<<${keyName.toUpperCase()}_IN_CODE_REMOVED>>${suffix}`;\n        }\n        return match;\n    });\n\n    modifiedCode = modifiedCode.replace(PATTERNS.EMAIL, (match, prefixQuote, emailFound, suffixQuote) => {\n        const lineStartMatch = modifiedCode.substring(0, modifiedCode.indexOf(match)).match(/^(.*)$/gm);\n        const currentLine = lineStartMatch ? lineStartMatch[lineStartMatch.length - 1] : '';\n        const isCommented = /^\\s*(\\/\\/|#|\\/\\*|\\*)/.test(currentLine);\n\n        if (!isCommented && emailFound.includes('@') && emailFound.includes('.') && !emailFound.startsWith('<<') && !match.includes('://')) {\n            sanitized = true;\n            return `${prefixQuote || ''}<<EMAIL_IN_CODE_REMOVED>>${suffixQuote || ''}`;\n        }\n        return match;\n    });\n\n    return sanitized ? modifiedCode : code;\n}\n\n// --- Main Script Logic ---\n\nconst workflowItem = $input.item;\nconst workflowData = workflowItem.json;\n\nif (!workflowData || !workflowData.nodes) {\n  return workflowItem; // Return original if structure is invalid\n}\n\n// Create a deep copy to modify safely\nconst sanitizedWorkflow = JSON.parse(JSON.stringify(workflowData));\n\n// 1. Sanitize Meta Data\nif (sanitizedWorkflow.meta) {\n  const metaKeysToRemove = ['instanceId', 'templateCredsSetupCompleted', 'secrets'];\n  for (const key of metaKeysToRemove) {\n      if (sanitizedWorkflow.meta.hasOwnProperty(key)) {\n          delete sanitizedWorkflow.meta[key];\n      }\n  }\n}\n\n// 2. Sanitize Nodes\nif (Array.isArray(sanitizedWorkflow.nodes)) {\n    for (const node of sanitizedWorkflow.nodes) {\n        // a. Remove entire credentials block\n        if (node.credentials) {\n            delete node.credentials;\n        }\n\n        // b. Sanitize sensitive keys directly on the node object\n        for (const nodeKey of SENSITIVE_NODE_KEYS) {\n             if (node.hasOwnProperty(nodeKey) && typeof node[nodeKey] === 'string' && node[nodeKey].length > 5 && !node[nodeKey].startsWith('<<')) {\n                 node[nodeKey] = `<<NODE_${nodeKey.toUpperCase()}_REMOVED>>`;\n             }\n        }\n\n        // c. Recursively sanitize parameters first (using substring checks)\n        if (node.parameters && typeof node.parameters === 'object') {\n            node.parameters = sanitizeObjectRecursive(node.parameters);\n        }\n\n        // d. Node-specific structural/override sanitization *after* recursion\n\n        // Override Google Calendar ID\n        if (node.type === 'n8n-nodes-base.googleCalendar' && node.parameters?.calendar?.value && typeof node.parameters.calendar.value === 'string') {\n           const calId = node.parameters.calendar.value;\n           if (!calId.startsWith('<<GOOGLE_CALENDAR_ID') && PATTERNS.GOOGLE_CALENDAR_ID_PATTERN.test(calId) ) {\n             const calendarName = node.parameters.calendar.cachedResultName || 'GOOGLE';\n             node.parameters.calendar.value = `<<GOOGLE_CALENDAR_ID_FOR_${calendarName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}_REMOVED>>`;\n          }\n        }\n\n        // Ensure Gmail Label IDs use the specific placeholder\n        if (node.type === 'n8n-nodes-base.gmail' && node.parameters?.filters?.labelIds && Array.isArray(node.parameters.filters.labelIds)) {\n            node.parameters.filters.labelIds = node.parameters.filters.labelIds.map(labelId => {\n                if (typeof labelId === 'string' && labelId.startsWith('Label_') && labelId !== '<<GMAIL_LABEL_ID_REMOVED>>') {\n                     return '<<GMAIL_LABEL_ID_REMOVED>>';\n                }\n                return labelId;\n            });\n        }\n\n         // Sanitize jsCode\n        if ((node.type === 'n8n-nodes-base.code' || node.type === 'n8n-nodes-base.function') && node.parameters?.jsCode) {\n           node.parameters.jsCode = sanitizeJsCode(node.parameters.jsCode);\n        }\n\n        // Ensure SSH command paths use the specific placeholder\n         if (node.type === 'n8n-nodes-base.ssh' && node.parameters?.command && typeof node.parameters.command === 'string') {\n             // Check if general path pattern hit it, and override\n             if (node.parameters.command.includes('<<ABSOLUTE_FILE_PATH_REMOVED>>')) {\n                 node.parameters.command = node.parameters.command.replace(/<<ABSOLUTE_FILE_PATH_REMOVED>>/g, '<<SSH_COMMAND_PATH_REMOVED>>');\n             }\n             // Also apply if the general pattern missed it somehow but it contains a path\n             else if (!node.parameters.command.startsWith('<<') && PATTERNS.ABS_PATH.test(node.parameters.command)) {\n                PATTERNS.ABS_PATH.lastIndex = 0;\n                node.parameters.command = node.parameters.command.replace(PATTERNS.ABS_PATH, '<<SSH_COMMAND_PATH_REMOVED>>');\n             }\n         }\n\n    }\n} else {\n     // console.warn(\"Warning: sanitizedWorkflow.nodes is not an array.\");\n}\n\n// Replace original json data with the sanitized version\nworkflowItem.json = sanitizedWorkflow;\n\nreturn workflowItem;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        200
+      ],
+      "id": "76ddf105-087f-4fc1-a54c-67343618dcd5",
+      "name": "Sanitize"
+    },
+    {
+      "parameters": {
+        "content": "    ## 🔄 GitHub Workflow Sync 🔄\n\n    **Zweck:** Dieser Workflow synchronisiert n8n Workflows mit einem GitHub Repository.\n\n    **Ablauf:**\n    1.  **Laden:** Lädt alle aktiven Workflows von der n8n Instanz.\n    2.  **Bereinigen (Sanitize):** Entfernt sensible Daten (Credentials, IPs, Pfade etc.) aus jedem Workflow.\n    3.  **Vergleichen:** Prüft für jeden Workflow, ob eine Version auf GitHub existiert und ob sie sich unterscheidet.\n    4.  **GitHub Update:**\n        *   **Neu (New):** Erstellt eine neue Datei im Repo, falls der Workflow noch nicht existiert.\n        *   **Anders (Different):** Aktualisiert die bestehende Datei im Repo, falls Änderungen erkannt wurden.\n        *   **Gleich (Same):** Keine Aktion, wenn der Workflow auf GitHub aktuell ist.\n\n    **Trigger:**\n    *   Manuell über \"On clicking 'execute'\".\n    *   Täglich um 20:00 Uhr über den Cron Trigger.\n\n    *(Doppelklick zum Bearbeiten)*",
+        "height": 1200,
+        "width": 2220
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        -480
+      ],
+      "id": "224f37ec-eae4-4734-8438-2813512f514e",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-04-26T09:57:01.000Z",
+  "versionId": "d06ae372-c870-41a0-803e-75bd7de4637a"
+}
