@@ -1,5 +1,5 @@
 {
-  "active": false,
+  "active": true,
   "connections": {
     "Merge Tasks & Checks": {
       "main": [
@@ -142,6 +142,11 @@
             "node": "Merge Calendars & Weather",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Bite Index",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -251,6 +256,17 @@
             "node": "Merge Tasks & Checks",
             "type": "main",
             "index": 4
+          }
+        ]
+      ]
+    },
+    "Bite Index": {
+      "main": [
+        [
+          {
+            "node": "Merge Calendars & Weather",
+            "type": "main",
+            "index": 3
           }
         ]
       ]
@@ -404,7 +420,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// This script assumes the input JSON data from OpenWeatherMap \n// is available in the first input item's JSON property (e.g., items[0].json in n8n).\n// It extracts key weather details for each 3-hour forecast interval.\n\n// Get the input data (adjust based on your specific workflow tool, e.g., n8n)\n// Example for n8n: const weatherData = items[0].json;\n// For testing purposes, you might hardcode the JSON or pass it differently.\n// We'll assume 'weatherData' variable holds the input object.\n// If running directly in a node, you might need to assign items[0].json to weatherData.\nconst weatherData = items[0].json; // <<< Make sure this line correctly accesses your input data\n\n// Get today's date in YYYY-MM-DD format (in the server's local timezone)\nconst today = new Date().toLocaleDateString('sv-SE'); // sv-SE format is YYYY-MM-DD\n\nconst formattedForecasts = [];\n\nif (weatherData && weatherData.list && Array.isArray(weatherData.list)) {\n  for (const forecast of weatherData.list) {\n    // Check if the forecast date matches today's date\n    const forecastDate = forecast.dt_txt.substring(0, 10); // Extract YYYY-MM-DD\n\n    if (forecastDate === today) {\n      const formattedItem = {\n        // Raw timestamp\n        timestamp: forecast.dt,\n        // Formatted date/time string\n        dateTime: forecast.dt_txt,\n        // Main weather parameters\n        temp: forecast.main?.temp,\n        feelsLike: forecast.main?.feels_like,\n        tempMin: forecast.main?.temp_min,\n        tempMax: forecast.main?.temp_max,\n        pressure: forecast.main?.pressure,\n        humidity: forecast.main?.humidity,\n        // Weather description and icon\n        weatherMain: forecast.weather?.[0]?.main,\n        weatherDescription: forecast.weather?.[0]?.description,\n        weatherIcon: forecast.weather?.[0]?.icon,\n        // Cloudiness percentage\n        clouds: forecast.clouds?.all,\n        // Wind details\n        windSpeed: forecast.wind?.speed,\n        windDeg: forecast.wind?.deg,\n        windGust: forecast.wind?.gust,\n        // Visibility\n        visibility: forecast.visibility,\n        // Probability of Precipitation (converted to percentage)\n        pop: (forecast.pop ?? 0) * 100, \n        // Rain volume in the last 3 hours (default to 0 if not present)\n        rain3h: forecast.rain?.['3h'] ?? 0,\n        // Snow volume in the last 3 hours (default to 0 if not present)\n        snow3h: forecast.snow?.['3h'] ?? 0, \n        // Part of day (d = day, n = night)\n        partOfDay: forecast.sys?.pod,\n      };\n      formattedForecasts.push({ json: formattedItem }); // Wrap each item in {json: ...} for n8n standard output\n    }\n  }\n} else {\n  // Handle cases where input data is missing or not in the expected format\n  // Return an empty array or an error structure\n  return [{ json: { error: \"Invalid or missing weather data input.\", inputReceived: weatherData } }];\n}\n\n// Return the array of formatted forecast items. \n// Each item will become a separate output item in n8n.\nreturn formattedForecasts;\n"
+        "jsCode": "// This script assumes the input JSON data from OpenWeatherMap \n// is available in the first input item's JSON property (e.g., items[0].json in n8n).\n// It extracts key weather details for each 3-hour forecast interval.\n\n// Get the input data (adjust based on your specific workflow tool, e.g., n8n)\n// Example for n8n: const weatherData = items[0].json;\n// For testing purposes, you might hardcode the JSON or pass it differently.\n// We'll assume 'weatherData' variable holds the input object.\n// If running directly in a node, you might need to assign items[0].json to weatherData.\nconst weatherData = items[0].json; // <<< Make sure this line correctly accesses your input data\n\n// Get today's date in YYYY-MM-DD format (in the server's local timezone)\nconst today = new Date().toLocaleDateString('sv-SE'); // sv-SE format is YYYY-MM-DD\n\n// Extract sunrise and sunset from the city data (assuming it exists)\nconst sunriseTs = weatherData?.city?.sunrise;\nconst sunsetTs = weatherData?.city?.sunset;\n\nconst formattedForecasts = [];\n\nif (weatherData && weatherData.list && Array.isArray(weatherData.list)) {\n  for (const forecast of weatherData.list) {\n    // Check if the forecast date matches today's date\n    const forecastDate = forecast.dt_txt.substring(0, 10); // Extract YYYY-MM-DD\n\n    if (forecastDate === today) {\n      const formattedItem = {\n        // Raw timestamp\n        timestamp: forecast.dt,\n        // Formatted date/time string\n        dateTime: forecast.dt_txt,\n        // Main weather parameters\n        temp: forecast.main?.temp,\n        feelsLike: forecast.main?.feels_like,\n        tempMin: forecast.main?.temp_min,\n        tempMax: forecast.main?.temp_max,\n        pressure: forecast.main?.pressure,\n        humidity: forecast.main?.humidity,\n        // Weather description and icon\n        weatherMain: forecast.weather?.[0]?.main,\n        weatherDescription: forecast.weather?.[0]?.description,\n        weatherIcon: forecast.weather?.[0]?.icon,\n        // Cloudiness percentage\n        clouds: forecast.clouds?.all,\n        // Wind details\n        windSpeed: forecast.wind?.speed,\n        windDeg: forecast.wind?.deg,\n        windGust: forecast.wind?.gust,\n        // Visibility\n        visibility: forecast.visibility,\n        // Probability of Precipitation (converted to percentage)\n        pop: (forecast.pop ?? 0) * 100, \n        // Rain volume in the last 3 hours (default to 0 if not present)\n        rain3h: forecast.rain?.['3h'] ?? 0,\n        // Snow volume in the last 3 hours (default to 0 if not present)\n        snow3h: forecast.snow?.['3h'] ?? 0, \n        // Part of day (d = day, n = night)\n        partOfDay: forecast.sys?.pod,\n        // Add sunrise and sunset timestamps\n        sunrise: sunriseTs,\n        sunset: sunsetTs,\n      };\n      formattedForecasts.push({ json: formattedItem }); // Wrap each item in {json: ...} for n8n standard output\n    }\n  }\n} else {\n  // Handle cases where input data is missing or not in the expected format\n  // Return an empty array or an error structure\n  // Add check for missing city data for sunrise/sunset\n  if (!sunriseTs || !sunsetTs) {\n      return [{ json: { error: \"Missing sunrise/sunset data in city object.\", inputReceived: weatherData } }];\n  }\n  return [{ json: { error: \"Invalid or missing weather data list.\", inputReceived: weatherData } }];\n}\n\n// Return the array of formatted forecast items. \n// Each item will become a separate output item in n8n.\nreturn formattedForecasts;\n"
       },
       "id": "59568a60-bd32-45a5-a316-30a50bab354d",
       "name": "Format Weather",
@@ -510,7 +526,7 @@
         "resource": "message",
         "guildId": {
           "__rl": true,
-          "value": "<<DISCORD_GUILDID_RL_REMOVED>>",
+          "value": "151414244603068426",
           "mode": "list",
           "cachedResultName": "LeL",
           "cachedResultUrl": "https://discord.com/channels/151414244603068426"
@@ -518,7 +534,7 @@
         "sendTo": "user",
         "userId": {
           "__rl": true,
-          "value": "<<DISCORD_USERID_RL_REMOVED>>",
+          "value": "151707357926129664",
           "mode": "list",
           "cachedResultName": "fr4iser"
         },
@@ -711,15 +727,32 @@
       "name": "Check Mails (Gmail)",
       "webhookId": "<<NODE_WEBHOOKID_REMOVED>>",
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This script calculates a simple fishing bite index based on weather data.\n// Input: Expects an array of items, each item.json contains weather data for a suitable slot\n// from the Filter Weather node (including dt, pressure, wind_speed, sunrise, sunset).\n// Output: Returns the input array, with an added 'beissindex' (0-10) property in each item.json.\n\nfunction calculateBiteIndex(weatherItems) {\n    if (!weatherItems || weatherItems.length === 0) {\n      console.log(\"No weather items received to calculate Bite Index.\");\n      return [];\n    }\n  \n    for (const item of weatherItems) {\n      const data = item.json;\n      let score = 5; // Start with a baseline score\n  \n      // Check if data exists and has timestamp before logging\n      if (!data || data.timestamp === undefined) {\n          console.warn(\"Skipping item due to missing data or timestamp:\", item);\n          continue; // Skip this item\n      }\n      \n      console.log(`Calculating index for dateTime: ${data.dateTime}`);\n  \n      // 1. Pressure Check\n      const pressure = data.pressure;\n      if (pressure) {\n          if (pressure >= 1010 && pressure <= 1022) score += 1; // Stable 'normal' pressure\n          else if (pressure < 1005 || pressure > 1028) score -= 1; // Very low or high pressure often less ideal\n          console.log(`  - Pressure (${pressure} hPa): Score adjusted to ${score}`);\n      } else {\n          console.log(\"  - Pressure data missing.\");\n      }\n  \n      // 2. Wind Speed Check (m/s)\n      const windSpeed = data.windSpeed; // Corrected field name\n      if (windSpeed !== undefined) {\n          if (windSpeed > 1.5 && windSpeed < 7) score += 1; // Light to moderate breeze often good (approx 5-25 km/h)\n          else if (windSpeed >= 7) score -= 1; // Strong wind often less ideal\n          console.log(`  - Wind Speed (${windSpeed} m/s): Score adjusted to ${score}`);\n      } else {\n           console.log(\"  - Wind Speed data missing.\");\n      }\n  \n      // 3. Time of Day Check (relative to sunrise/sunset)\n      const dt = data.timestamp; // Use raw timestamp\n      const sunrise = data.sunrise; // Use added sunrise timestamp\n      const sunset = data.sunset;   // Use added sunset timestamp\n      if (dt && sunrise && sunset) {\n          const hoursAfterSunrise = (dt - sunrise) / 3600;\n          const hoursBeforeSunset = (sunset - dt) / 3600;\n          // Check if within ~2 hours of sunrise or sunset\n          if ((hoursAfterSunrise >= -0.5 && hoursAfterSunrise <= 2) || (hoursBeforeSunset >= -0.5 && hoursBeforeSunset <= 2)) {\n              score += 2; // Prime bite times\n              console.log(`  - Time (Dawn/Dusk): Score adjusted to ${score}`);\n          }\n      } else {\n          console.log(`  - Time check skipped (Missing dt: ${!dt}, sunrise: ${!sunrise}, sunset: ${!sunset})`);\n      }\n  \n      // 4. Weather Condition Check (using weatherMain)\n      const conditionMain = (data.weatherMain || '').toLowerCase(); // Corrected field name\n      if (conditionMain.includes('cloud') || conditionMain.includes('overcast') || conditionMain.includes('mist') || conditionMain.includes('fog') || conditionMain.includes('rain') || conditionMain.includes('drizzle')) {\n        score += 1; // Slightly favor overcast/low light/rainy\n        console.log(`  - Condition (${conditionMain}): Score adjusted to ${score}`);\n      } else if (conditionMain.includes('clear') || conditionMain.includes('sun')) {\n         // Optional: Slightly decrease score for bright sunny conditions if desired\n         // score -= 0.5;\n         // console.log(`  - Condition (${conditionMain}): Score slightly decreased`);\n      }\n       else {\n           console.log(`  - Condition (${conditionMain}): No adjustment.`);\n      }\n  \n      // Normalize score to 0-10 range\n      score = Math.max(0, Math.min(10, Math.round(score)));\n      console.log(`  - Final Score: ${score}/10`);\n  \n      item.json.beissindex = score;\n    }\n  \n    return weatherItems;\n  }\n  \n  // Assuming the input comes directly from the previous node's items\n  // The input items should be the array output from the Format Weather node\n  const inputItems = items; \n  return calculateBiteIndex(inputItems);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        4880
+      ],
+      "id": "1195e9bc-fba6-4c62-be24-4d49beb1e1d5",
+      "name": "Bite Index"
     }
   ],
   "pinData": {},
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Daily Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "tags": [],
-  "triggerCount": 0,
-  "updatedAt": "2025-04-25T18:18:44.000Z",
-  "versionId": "c413628b-7c22-42de-824d-9e8a80925de9"
+  "triggerCount": 1,
+  "updatedAt": "2025-04-27T07:20:48.000Z",
+  "versionId": "d2623332-03c0-439c-9e29-a3ae1cd3f4cb"
 }
