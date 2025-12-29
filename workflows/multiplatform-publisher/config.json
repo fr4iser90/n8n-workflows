@@ -1,0 +1,657 @@
+{
+  "name": "Multi-Platform Social Media Publisher",
+  "description": "Publish DJ events to multiple social media platforms simultaneously",
+  "version": "1.0.0",
+  "author": "fr4iser",
+  "platforms": ["twitter", "instagram", "facebook", "linkedin", "reddit", "email"],
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "📥 Webhook Trigger",
+      "type": "webhook",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dj-event",
+        "responseMode": "responseNode"
+      },
+      "position": [260, 80],
+      "webhookId": "dj-event-webhook"
+    },
+    {
+      "id": "webhook-response",
+      "name": "✅ Webhook Response",
+      "type": "respondToWebhook",
+      "parameters": {
+        "respondWith": "allIncomingItems"
+      },
+      "position": [2560, 0]
+    },
+    {
+      "id": "validate-input",
+      "name": "🔍 Validate & Prepare Data",
+      "type": "code",
+      "script": "validate-input.js",
+      "position": [480, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "validate-platforms",
+      "name": "✅ Validate Platforms",
+      "type": "code",
+      "script": "validate-platforms.js",
+      "position": [520, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "validate-urls",
+      "name": "🔗 Validate URLs",
+      "type": "code",
+      "script": "validate-urls.js",
+      "position": [640, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "format-content",
+      "name": "✏️ Format Content for Platforms",
+      "type": "code",
+      "script": "format-content.js",
+      "position": [760, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "generate-hashtags",
+      "name": "🏷️ Generate Hashtags",
+      "type": "code",
+      "script": "generate-hashtags.js",
+      "position": [880, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "collect-results",
+      "name": "📊 Collect Results",
+      "type": "code",
+      "script": "collect-results.js",
+      "position": [1360, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "enhanced-logging",
+      "name": "📋 Enhanced Logging",
+      "type": "code",
+      "script": "enhanced-logging.js",
+      "position": [1480, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "send-notifications",
+      "name": "📢 Send Notifications",
+      "type": "code",
+      "script": "send-notifications.js",
+      "position": [1600, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "merge-results",
+      "name": "🔀 Merge Results",
+      "type": "set",
+      "parameters": {
+        "assignments": [
+          {
+            "id": "merge-001",
+            "name": "finalResult",
+            "value": "={{ $json }}",
+            "type": "object"
+          }
+        ]
+      },
+      "position": [1680, 60],
+      "typeVersion": 3.4
+    },
+    {
+      "id": "platform-twitter-check",
+      "name": "🐦 Post to Twitter/X?",
+      "type": "if",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.publishTo.twitter }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [980, -120],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-twitter-post",
+      "name": "🐦 Post to Twitter/X",
+      "type": "twitter",
+      "parameters": {},
+      "position": [1140, -20],
+      "typeVersion": 2.1
+    },
+    {
+      "id": "platform-instagram-check",
+      "name": "📷 Post to Instagram?",
+      "type": "if",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.publishTo.instagram }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [920, 80],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-instagram-post",
+      "name": "📷 Post to Instagram",
+      "type": "instagram",
+      "parameters": {},
+      "position": [1140, 80],
+      "typeVersion": 1
+    },
+    {
+      "id": "platform-facebook-check",
+      "name": "👤 Post to Facebook?",
+      "type": "if",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.publishTo.facebook }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [920, 180],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-facebook-post",
+      "name": "👤 Post to Facebook Page",
+      "type": "facebook",
+      "parameters": {},
+      "position": [1140, 180],
+      "typeVersion": 2.1
+    },
+    {
+      "id": "platform-linkedin-check",
+      "name": "💼 Post to LinkedIn?",
+      "type": "if",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.publishTo.linkedin }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [920, 280],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-linkedin-post",
+      "name": "💼 Post to LinkedIn",
+      "type": "linkedIn",
+      "parameters": {},
+      "position": [1140, 280],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-email-check",
+      "name": "📧 Send Email?",
+      "type": "if",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.publishTo.email && $json.emailRecipients && $json.emailRecipients.length > 0 }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [920, 380],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-email-send",
+      "name": "📧 Send Email",
+      "type": "emailSend",
+      "parameters": {
+        "fromEmail": "={{ $env.EMAIL_FROM || 'noreply@example.com' }}",
+        "toEmail": "={{ $json.emailRecipients.join(',') }}",
+        "subject": "={{ $json.eventTitle }} - {{ $json.formattedDate }}",
+        "html": "={{ $json.emailHtml }}",
+        "options": {
+          "attachments": "={{ $json.imageUrl ? [{ url: $json.imageUrl, name: 'event-image.jpg' }] : [] }}"
+        }
+      },
+      "position": [1140, 380],
+      "typeVersion": 2.1
+    },
+    {
+      "id": "platform-reddit-check",
+      "name": "🔴 Post to Reddit?",
+      "type": "if",
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.publishTo.reddit && $json.redditSubreddit }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "position": [920, 620],
+      "typeVersion": 2
+    },
+    {
+      "id": "platform-reddit-post",
+      "name": "🔴 Post to Reddit",
+      "type": "httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "https://oauth.reddit.com/api/submit",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "={{ $env.REDDIT_USER_AGENT || 'n8n-workflow/1.0' }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "sr",
+              "value": "={{ $json.redditSubreddit }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.eventTitle }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.redditText }}"
+            },
+            {
+              "name": "kind",
+              "value": "={{ $json.redditPostType || 'self' }}"
+            },
+            {
+              "name": "nsfw",
+              "value": "={{ $json.redditNsfw ? 'true' : 'false' }}"
+            },
+            {
+              "name": "spoiler",
+              "value": "={{ $json.redditSpoiler ? 'true' : 'false' }}"
+            },
+            {
+              "name": "flair_text",
+              "value": "={{ $json.redditFlair || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "position": [1140, 620],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "webhook-trigger": {
+      "main": [
+        [
+          {
+            "node": "validate-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate-input": {
+      "main": [
+        [
+          {
+            "node": "validate-platforms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate-platforms": {
+      "main": [
+        [
+          {
+            "node": "validate-urls",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate-urls": {
+      "main": [
+        [
+          {
+            "node": "format-content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "format-content": {
+      "main": [
+        [
+          {
+            "node": "generate-hashtags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generate-hashtags": {
+      "main": [
+        [
+          {
+            "node": "platform-twitter-check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "platform-instagram-check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "platform-facebook-check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "platform-linkedin-check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "platform-email-check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "platform-reddit-check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "twitter-check": {
+      "main": [
+        [],
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "instagram-check": {
+      "main": [
+        [],
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "facebook-check": {
+      "main": [
+        [],
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "linkedin-check": {
+      "main": [
+        [],
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email-check": {
+      "main": [
+        [
+          {
+            "node": "platform-email-send",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email-send": {
+      "main": [
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reddit-check": {
+      "main": [
+        [
+          {
+            "node": "platform-reddit-post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reddit-post": {
+      "main": [
+        [
+          {
+            "node": "collect-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "collect-results": {
+      "main": [
+        [
+          {
+            "node": "enhanced-logging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enhanced-logging": {
+      "main": [
+        [
+          {
+            "node": "send-notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send-notifications": {
+      "main": [
+        [
+          {
+            "node": "merge-results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "merge-results": {
+      "main": [
+        [
+          {
+            "node": "webhook-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "stickyNotes": [
+    {
+      "id": "overview",
+      "name": "📋 Overview",
+      "file": "overview.md",
+      "height": 600,
+      "width": 800,
+      "color": 5,
+      "position": [840, 1120]
+    },
+    {
+      "id": "input-format",
+      "name": "📥 Input Format",
+      "file": "input-format.md",
+      "height": 700,
+      "width": 600,
+      "position": [40, 640]
+    },
+    {
+      "id": "credentials-overview",
+      "name": "🔐 Credentials Overview",
+      "file": "credentials-overview.md",
+      "height": 500,
+      "width": 600,
+      "color": 3,
+      "position": [40, 1380]
+    },
+    {
+      "id": "twitter-credentials",
+      "name": "🐦 Twitter Credentials",
+      "file": "twitter-credentials.md",
+      "height": 450,
+      "width": 500,
+      "color": 2,
+      "position": [1960, 600]
+    },
+    {
+      "id": "instagram-credentials",
+      "name": "📷 Instagram Credentials",
+      "file": "instagram-credentials.md",
+      "height": 710,
+      "width": 500,
+      "color": 2,
+      "position": [1940, 1380]
+    },
+    {
+      "id": "facebook-credentials",
+      "name": "👤 Facebook Credentials",
+      "file": "facebook-credentials.md",
+      "height": 680,
+      "width": 500,
+      "color": 2,
+      "position": [2480, 1380]
+    },
+    {
+      "id": "linkedin-credentials",
+      "name": "💼 LinkedIn Credentials",
+      "file": "linkedin-credentials.md",
+      "height": 500,
+      "width": 500,
+      "color": 2,
+      "position": [2520, 600]
+    },
+    {
+      "id": "reddit-credentials",
+      "name": "🔴 Reddit Credentials",
+      "file": "reddit-credentials.md",
+      "height": 960,
+      "width": 500,
+      "color": 2,
+      "position": [3060, 1380]
+    },
+    {
+      "id": "email-credentials",
+      "name": "📧 Email Credentials",
+      "file": "email-credentials.md",
+      "height": 550,
+      "width": 500,
+      "color": 2,
+      "position": [3140, 580]
+    },
+    {
+      "id": "discord-telegram-setup",
+      "name": "📢 Discord & Telegram Setup",
+      "file": "discord-telegram-setup.md",
+      "height": 600,
+      "width": 700,
+      "color": 6,
+      "position": [3700, 1380]
+    }
+  ]
+}

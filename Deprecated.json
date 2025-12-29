@@ -1,0 +1,727 @@
+{
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "dj-event",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "352d9b1e-52a1-4cc5-9169-f9aca764c404",
+        "name": "📥 Webhook Trigger",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          260,
+          80
+        ],
+        "webhookId": "dj-event-webhook",
+        "notesInFlow": true,
+        "notes": "EN: Webhook endpoint to receive event data. POST JSON with event details.\nDE: Webhook-Endpunkt zum Empfangen von Event-Daten. POST JSON mit Event-Details.\n\nExpected Input Format / Erwartetes Eingabeformat:\n{\n  \"eventTitle\": \"DJ Night @ Club XYZ\",\n  \"eventDate\": \"2025-05-15\",\n  \"eventTime\": \"22:00\",\n  \"venue\": \"Club XYZ\",\n  \"city\": \"Berlin\",\n  \"description\": \"Amazing DJ night with...\",\n  \"imageUrl\": \"https://example.com/image.jpg\",\n  \"ticketUrl\": \"https://tickets.example.com\",\n  \"publishTo\": {\n    \"twitter\": true,\n    \"instagram\": true,\n    \"facebook\": true,\n    \"linkedin\": false,\n    \"reddit\": true,\n    \"email\": true\n  },\n  \"emailRecipients\": [\"fan1@example.com\", \"fan2@example.com\"],\n  \"redditSubreddit\": \"DJs\",\n  \"redditFlair\": \"Event\",\n  \"redditNsfw\": false,\n  \"redditSpoiler\": false\n}"
+      },
+      {
+        "parameters": {
+          "respondWith": "allIncomingItems",
+          "options": {}
+        },
+        "id": "6577ea7f-cc1f-432a-b896-c876f568d5a0",
+        "name": "✅ Webhook Response",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          2560,
+          0
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Sends response back to webhook caller.\nDE: Sendet Antwort zurück an Webhook-Aufrufer."
+      },
+      {
+        "parameters": {
+          "jsCode": "// EN: Validate and prepare input data\n// DE: Eingabedaten validieren und vorbereiten\n\nconst item = $input.item.json;\n\n// Required fields check / Pflichtfelder prüfen\nconst requiredFields = ['eventTitle', 'eventDate', 'venue', 'city'];\nconst missingFields = requiredFields.filter(field => !item[field]);\n\nif (missingFields.length > 0) {\n  throw new Error(`Missing required fields: ${missingFields.join(', ')}`);\n}\n\n// Set defaults / Standardwerte setzen\nconst publishTo = item.publishTo || {\n  twitter: true,\n  instagram: true,\n  facebook: true,\n  linkedin: false,\n  reddit: false,\n  email: false\n};\n\n// Format date / Datum formatieren\nlet formattedDate = item.eventDate;\nif (item.eventDate && item.eventTime) {\n  const date = new Date(`${item.eventDate}T${item.eventTime}`);\n  formattedDate = date.toLocaleDateString('de-DE', { \n    weekday: 'long', \n    year: 'numeric', \n    month: 'long', \n    day: 'numeric' \n  });\n}\n\n// Prepare output / Ausgabe vorbereiten\nreturn [{\n  json: {\n    eventTitle: item.eventTitle,\n    eventDate: item.eventDate,\n    eventTime: item.eventTime || '22:00',\n    formattedDate: formattedDate,\n    venue: item.venue,\n    city: item.city,\n    description: item.description || '',\n    imageUrl: item.imageUrl || '',\n    ticketUrl: item.ticketUrl || '',\n    publishTo: publishTo,\n    emailRecipients: item.emailRecipients || [],\n    // Reddit-specific fields / Reddit-spezifische Felder\n    redditSubreddit: item.redditSubreddit || '',\n    redditFlair: item.redditFlair || '',\n    redditNsfw: item.redditNsfw || false,\n    redditSpoiler: item.redditSpoiler || false,\n    redditPostType: item.redditPostType || 'text', // 'text' or 'link'\n    timestamp: new Date().toISOString()\n  }\n}];"
+        },
+        "id": "76ba1c11-8603-47cc-a7ee-34764bd376bb",
+        "name": "🔍 Validate & Prepare Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          80
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Validates required fields and prepares data for posting.\nDE: Validiert Pflichtfelder und bereitet Daten für das Posting vor.\n\nRequired Fields / Pflichtfelder:\n- eventTitle: Event name\n- eventDate: Date in YYYY-MM-DD format\n- venue: Venue name\n- city: City name\n\nOptional Fields / Optionale Felder:\n- eventTime: Time (HH:MM)\n- description: Event description\n- imageUrl: URL to event image\n- ticketUrl: URL to tickets\n- publishTo: Object with boolean flags for each platform\n- emailRecipients: Array of email addresses\n- redditSubreddit: Subreddit name (required if reddit enabled)\n- redditFlair: Flair text for Reddit post\n- redditNsfw: NSFW flag (true/false)\n- redditSpoiler: Spoiler flag (true/false)\n- redditPostType: 'self' (text) or 'link'"
+      },
+      {
+        "parameters": {
+          "jsCode": "// EN: Format content for different platforms\n// DE: Content für verschiedene Plattformen formatieren\n\nconst item = $input.item.json;\n\n// Base text / Basistext\nconst baseText = `${item.eventTitle}\n\n📅 ${item.formattedDate}\n🕐 ${item.eventTime}\n📍 ${item.venue}, ${item.city}\n\n${item.description || ''}`.trim();\n\n// Twitter/X format (280 chars max) / Twitter/X Format (max. 280 Zeichen)\nlet twitterText = baseText;\nif (item.ticketUrl) {\n  twitterText += `\n\n🎫 Tickets: ${item.ticketUrl}`;\n}\n// Truncate if too long / Kürzen falls zu lang\nif (twitterText.length > 280) {\n  twitterText = twitterText.substring(0, 277) + '...';\n}\n\n// Instagram format (2200 chars max, supports emojis) / Instagram Format (max. 2200 Zeichen)\nlet instagramText = `${item.eventTitle}\n\n📅 ${item.formattedDate}\n🕐 ${item.eventTime}\n📍 ${item.venue}, ${item.city}\n\n${item.description || ''}`;\nif (item.ticketUrl) {\n  instagramText += `\n\n🎫 Link in Bio oder: ${item.ticketUrl}`;\n}\ninstagramText += `\n\n#DJ #Event #${item.city.replace(/\\s/g, '')} #Nightlife`;\n\n// Facebook format / Facebook Format\nlet facebookText = `${item.eventTitle}\n\n📅 ${item.formattedDate}\n🕐 ${item.eventTime}\n📍 ${item.venue}, ${item.city}\n\n${item.description || ''}`;\nif (item.ticketUrl) {\n  facebookText += `\n\n🎫 Tickets: ${item.ticketUrl}`;\n}\n\n// LinkedIn format (professional tone) / LinkedIn Format (professioneller Ton)\nlet linkedinText = `🎧 ${item.eventTitle}\n\n📅 Date: ${item.formattedDate}\n🕐 Time: ${item.eventTime}\n📍 Location: ${item.venue}, ${item.city}\n\n${item.description || 'Join us for an amazing night!'}`;\nif (item.ticketUrl) {\n  linkedinText += `\n\n🎫 Get your tickets: ${item.ticketUrl}`;\n}\n\n// Reddit format (Markdown supported) / Reddit Format (Markdown unterstützt)\nlet redditText = `# ${item.eventTitle}\n\n**📅 Date:** ${item.formattedDate}\n**🕐 Time:** ${item.eventTime}\n**📍 Location:** ${item.venue}, ${item.city}\n\n${item.description || ''}\n\n---\n\n**Event Details:**\n- **Venue:** ${item.venue}\n- **City:** ${item.city}\n- **Date:** ${item.formattedDate}\n- **Time:** ${item.eventTime}`;\n\nif (item.ticketUrl) {\n  redditText += `\n\n**🎫 [Get Tickets](${item.ticketUrl})**`;\n}\n\nif (item.imageUrl) {\n  redditText += `\n\n![Event Image](${item.imageUrl})`;\n}\n\nredditText += `\n\n---\n\n*Posted by automated system*`;\n\n// Email format (HTML) / E-Mail Format (HTML)\nconst emailHtml = `\n  <h2>${item.eventTitle}</h2>\n  <p><strong>📅 Date:</strong> ${item.formattedDate}</p>\n  <p><strong>🕐 Time:</strong> ${item.eventTime}</p>\n  <p><strong>📍 Location:</strong> ${item.venue}, ${item.city}</p>\n  ${item.description ? `<p>${item.description}</p>` : ''}\n  ${item.ticketUrl ? `<p><a href=\"${item.ticketUrl}\" style=\"background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;\">🎫 Get Tickets</a></p>` : ''}\n`;\n\nconst emailText = `${item.eventTitle}\n\nDate: ${item.formattedDate}\nTime: ${item.eventTime}\nLocation: ${item.venue}, ${item.city}\n\n${item.description || ''}\n\n${item.ticketUrl ? `Tickets: ${item.ticketUrl}` : ''}`;\n\nreturn [{\n  json: {\n    ...item,\n    twitterText: twitterText,\n    instagramText: instagramText,\n    facebookText: facebookText,\n    linkedinText: linkedinText,\n    redditText: redditText,\n    emailHtml: emailHtml,\n    emailText: emailText\n  }\n}];"
+        },
+        "id": "cfac0b95-f331-4b42-a070-27a374f2a678",
+        "name": "✏️ Format Content for Platforms",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          700,
+          80
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Formats event content optimized for each platform:\n- Twitter/X: Max 280 characters\n- Instagram: Up to 2200 characters, includes hashtags\n- Facebook: Standard format\n- LinkedIn: Professional tone\n- Reddit: Markdown format with headers and formatting\n- Email: HTML and plain text versions\n\nDE: Formatiert Event-Content optimiert für jede Plattform:\n- Twitter/X: Max. 280 Zeichen\n- Instagram: Bis zu 2200 Zeichen, inkl. Hashtags\n- Facebook: Standard-Format\n- LinkedIn: Professioneller Ton\n- Reddit: Markdown-Format mit Überschriften und Formatierung\n- E-Mail: HTML und Plain-Text Versionen"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.publishTo.twitter }}",
+                "value2": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "827c79c6-511a-44c1-adfb-0e8128b7cf33",
+        "name": "🐦 Post to Twitter/X?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          980,
+          -120
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Checks if Twitter/X posting is enabled.\nDE: Prüft, ob Twitter/X Posting aktiviert ist.\n\nConfigure in publishTo.twitter field.\nIn publishTo.twitter Feld konfigurieren."
+      },
+      {
+        "parameters": {},
+        "id": "3b129884-ff45-4a80-8a94-d9fc0986410e",
+        "name": "🐦 Post to Twitter/X",
+        "type": "n8n-nodes-base.twitter",
+        "typeVersion": 2.1,
+        "position": [
+          1140,
+          -20
+        ],
+        "notesInFlow": true,
+        "credentials": {},
+        "notes": "EN: Posts to Twitter/X.\n\nCREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH:\n- Twitter OAuth1 API credentials\n- Get from: https://developer.twitter.com/\n- Create App → API Keys & Tokens\n- Need: API Key, API Secret, Access Token, Access Token Secret\n\nDE: Postet auf Twitter/X.\n\nCREDENTIALS ERFORDERLICH:\n- Twitter OAuth1 API Credentials\n- Von: https://developer.twitter.com/\n- App erstellen → API Keys & Tokens\n- Benötigt: API Key, API Secret, Access Token, Access Token Secret"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.publishTo.instagram }}",
+                "value2": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "65ee75dc-cd21-4228-8e98-fdb9cf3e7b84",
+        "name": "📷 Post to Instagram?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          920,
+          80
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Checks if Instagram posting is enabled.\nDE: Prüft, ob Instagram Posting aktiviert ist.\n\nConfigure in publishTo.instagram field.\nIn publishTo.instagram Feld konfigurieren.\n\nNOTE: Instagram API requires Facebook Business Account and Meta App.\nHINWEIS: Instagram API benötigt Facebook Business Account und Meta App."
+      },
+      {
+        "parameters": {},
+        "id": "84edcee3-585d-42df-aa07-18e068cbbe53",
+        "name": "📷 Post to Instagram",
+        "type": "n8n-nodes-base.instagram",
+        "typeVersion": 1,
+        "position": [
+          1140,
+          80
+        ],
+        "notesInFlow": true,
+        "credentials": {},
+        "notes": "EN: Posts image to Instagram.\n\nCREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH:\n- Instagram OAuth2 API (via Facebook Graph API)\n- Requires Facebook Business Account\n- Create Meta App: https://developers.facebook.com/\n- App Type: Business\n- Add Instagram Basic Display or Instagram Graph API product\n- Need: App ID, App Secret, Access Token\n- User must grant permissions\n\nDE: Postet Bild auf Instagram.\n\nCREDENTIALS ERFORDERLICH:\n- Instagram OAuth2 API (über Facebook Graph API)\n- Benötigt Facebook Business Account\n- Meta App erstellen: https://developers.facebook.com/\n- App-Typ: Business\n- Instagram Basic Display oder Instagram Graph API Produkt hinzufügen\n- Benötigt: App ID, App Secret, Access Token\n- Benutzer muss Berechtigungen erteilen"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.publishTo.facebook }}",
+                "value2": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "77098b6c-85e7-4f49-9128-4412e2a73f0a",
+        "name": "👤 Post to Facebook?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          920,
+          180
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Checks if Facebook posting is enabled.\nDE: Prüft, ob Facebook Posting aktiviert ist.\n\nConfigure in publishTo.facebook field.\nIn publishTo.facebook Feld konfigurieren."
+      },
+      {
+        "parameters": {},
+        "id": "ad7fa259-2f81-4a1b-ab5d-5202ce5123bc",
+        "name": "👤 Post to Facebook Page",
+        "type": "n8n-nodes-base.facebook",
+        "typeVersion": 2.1,
+        "position": [
+          1140,
+          180
+        ],
+        "notesInFlow": true,
+        "credentials": {},
+        "notes": "EN: Posts to Facebook Page.\n\nCREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH:\n- Facebook OAuth2 API\n- Create Meta App: https://developers.facebook.com/\n- App Type: Business\n- Add Facebook Login product\n- Need: App ID, App Secret, Access Token\n- Page Access Token (with pages_manage_posts permission)\n- Set FACEBOOK_PAGE_ID environment variable\n\nDE: Postet auf Facebook-Seite.\n\nCREDENTIALS ERFORDERLICH:\n- Facebook OAuth2 API\n- Meta App erstellen: https://developers.facebook.com/\n- App-Typ: Business\n- Facebook Login Produkt hinzufügen\n- Benötigt: App ID, App Secret, Access Token\n- Seiten-Access-Token (mit pages_manage_posts Berechtigung)\n- FACEBOOK_PAGE_ID Umgebungsvariable setzen"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.publishTo.linkedin }}",
+                "value2": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "fc28a96c-a601-4345-a01b-d1d5fd030c1b",
+        "name": "💼 Post to LinkedIn?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          920,
+          280
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Checks if LinkedIn posting is enabled.\nDE: Prüft, ob LinkedIn Posting aktiviert ist.\n\nConfigure in publishTo.linkedin field.\nIn publishTo.linkedin Feld konfigurieren."
+      },
+      {
+        "parameters": {},
+        "id": "0a88b3d4-f91a-4ced-8791-eabd92240763",
+        "name": "💼 Post to LinkedIn",
+        "type": "n8n-nodes-base.linkedIn",
+        "typeVersion": 2,
+        "position": [
+          1140,
+          280
+        ],
+        "notesInFlow": true,
+        "credentials": {},
+        "notes": "EN: Posts to LinkedIn.\n\nCREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH:\n- LinkedIn OAuth2 API\n- Create LinkedIn App: https://www.linkedin.com/developers/apps\n- Need: Client ID, Client Secret\n- OAuth Redirect URL (e.g., https://your-n8n-instance.com/rest/oauth2-credential/callback)\n- Request permissions: w_member_social, w_organization_social\n- Generate Access Token\n\nDE: Postet auf LinkedIn.\n\nCREDENTIALS ERFORDERLICH:\n- LinkedIn OAuth2 API\n- LinkedIn App erstellen: https://www.linkedin.com/developers/apps\n- Benötigt: Client ID, Client Secret\n- OAuth Redirect URL (z.B. https://deine-n8n-instanz.com/rest/oauth2-credential/callback)\n- Berechtigungen anfordern: w_member_social, w_organization_social\n- Access Token generieren"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.publishTo.email && $json.emailRecipients && $json.emailRecipients.length > 0 }}",
+                "value2": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "d9223373-6756-4f9b-93b9-d03bdc7acd05",
+        "name": "📧 Send Email?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          920,
+          380
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Checks if email sending is enabled and recipients are provided.\nDE: Prüft, ob E-Mail-Versand aktiviert ist und Empfänger vorhanden sind.\n\nConfigure in publishTo.email field and provide emailRecipients array.\nIn publishTo.email Feld konfigurieren und emailRecipients Array bereitstellen."
+      },
+      {
+        "parameters": {
+          "fromEmail": "={{ $env.EMAIL_FROM || 'noreply@example.com' }}",
+          "toEmail": "={{ $json.emailRecipients.join(',') }}",
+          "subject": "={{ $json.eventTitle }} - {{ $json.formattedDate }}",
+          "html": "={{ $json.emailHtml }}",
+          "options": {
+            "attachments": "={{ $json.imageUrl ? [{ url: $json.imageUrl, name: 'event-image.jpg' }] : [] }}"
+          }
+        },
+        "id": "dcd8c705-e644-46a1-b8ce-65a6e77d8ac0",
+        "name": "📧 Send Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1140,
+          380
+        ],
+        "notesInFlow": true,
+        "webhookId": "274891bb-44f8-432b-8913-a93d5f1e2bec",
+        "notes": "EN: Sends email to recipients.\n\nCREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH:\n- SMTP credentials\n- Options:\n  * Gmail: Use Gmail OAuth2 or App Password\n  * Outlook: Use Office 365 SMTP\n  * Custom SMTP: Host, Port, User, Password\n- Set EMAIL_FROM environment variable (optional)\n\nSMTP Settings Example / SMTP Einstellungen Beispiel:\n- Host: smtp.gmail.com\n- Port: 587 (TLS) or 465 (SSL)\n- User: your-email@gmail.com\n- Password: App Password (for Gmail)\n\nDE: Sendet E-Mail an Empfänger.\n\nCREDENTIALS ERFORDERLICH:\n- SMTP Credentials\n- Optionen:\n  * Gmail: Gmail OAuth2 oder App-Passwort verwenden\n  * Outlook: Office 365 SMTP verwenden\n  * Custom SMTP: Host, Port, Benutzer, Passwort\n- EMAIL_FROM Umgebungsvariable setzen (optional)"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "boolean": [
+              {
+                "value1": "={{ $json.publishTo.reddit && $json.redditSubreddit }}",
+                "value2": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "347c6874-5430-42b0-abdf-6ab61b7d1f0a",
+        "name": "🔴 Post to Reddit?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          920,
+          620
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Checks if Reddit posting is enabled and subreddit is provided.\nDE: Prüft, ob Reddit Posting aktiviert ist und Subreddit angegeben ist.\n\nConfigure in publishTo.reddit field and provide redditSubreddit.\nIn publishTo.reddit Feld konfigurieren und redditSubreddit angeben.\n\nRequired for Reddit / Erforderlich für Reddit:\n- redditSubreddit: Subreddit name (e.g., 'DJs', 'Techno', 'berlin')\n- Optional: redditFlair, redditNsfw, redditSpoiler, redditPostType"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://oauth.reddit.com/api/submit",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "={{ $env.REDDIT_USER_AGENT || 'n8n-workflow/1.0' }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "sr",
+                "value": "={{ $json.redditSubreddit }}"
+              },
+              {
+                "name": "title",
+                "value": "={{ $json.eventTitle }}"
+              },
+              {
+                "name": "text",
+                "value": "={{ $json.redditText }}"
+              },
+              {
+                "name": "kind",
+                "value": "={{ $json.redditPostType || 'self' }}"
+              },
+              {
+                "name": "nsfw",
+                "value": "={{ $json.redditNsfw ? 'true' : 'false' }}"
+              },
+              {
+                "name": "spoiler",
+                "value": "={{ $json.redditSpoiler ? 'true' : 'false' }}"
+              },
+              {
+                "name": "flair_text",
+                "value": "={{ $json.redditFlair || '' }}"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "id": "8cbb5058-bc63-4f9d-aee1-f8048d2a6808",
+        "name": "🔴 Post to Reddit",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1140,
+          620
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Posts to Reddit using Reddit API.\n\nCREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH:\n- Reddit OAuth2 Token (HTTP Header Auth)\n- Create Reddit App: https://www.reddit.com/prefs/apps\n- App Type: 'script'\n- Need: Client ID, Client Secret\n- Get OAuth Token: https://github.com/reddit-archive/reddit/wiki/OAuth2\n- Token format: 'Bearer YOUR_ACCESS_TOKEN'\n- Set REDDIT_USER_AGENT environment variable (optional)\n\nReddit-Specific Fields / Reddit-spezifische Felder:\n- redditSubreddit: Subreddit name (required / erforderlich)\n- redditFlair: Flair text (optional / optional)\n- redditNsfw: NSFW flag (true/false)\n- redditSpoiler: Spoiler flag (true/false)\n- redditPostType: 'self' (text) or 'link' (default: 'self')\n\nDE: Postet auf Reddit über Reddit API.\n\nCREDENTIALS ERFORDERLICH:\n- Reddit OAuth2 Token (HTTP Header Auth)\n- Reddit App erstellen: https://www.reddit.com/prefs/apps\n- App-Typ: 'script'\n- Benötigt: Client ID, Client Secret\n- OAuth Token holen: https://github.com/reddit-archive/reddit/wiki/OAuth2\n- Token-Format: 'Bearer DEIN_ACCESS_TOKEN'\n- REDDIT_USER_AGENT Umgebungsvariable setzen (optional)"
+      },
+      {
+        "parameters": {
+          "jsCode": "// EN: Collect results from all posting operations\n// DE: Sammelt Ergebnisse aller Posting-Operationen\n\nconst results = [];\nconst allItems = $input.all();\n\n// Get original event data from first item / Hole ursprüngliche Event-Daten vom ersten Item\nconst inputData = allItems[0]?.json || {};\n\n// Platform detection from data / Plattform-Erkennung aus Daten\nconst detectPlatform = (item) => {\n  // Check for platform-specific fields / Prüfe plattform-spezifische Felder\n  if (item.id_str || item.id) return 'Twitter/X';\n  if (item.instagram_id || item.media_id) return 'Instagram';\n  if (item.post_id || item.facebook_id) return 'Facebook';\n  if (item.linkedin_id || item.urn) return 'LinkedIn';\n  if (item.messageId || item.emailId) return 'Email';\n  if (item.name && item.name.startsWith('t3_')) return 'Reddit';\n  // Fallback: check for error or success indicators / Fallback: Prüfe Fehler- oder Erfolgs-Indikatoren\n  if (item.error) return 'Unknown Platform';\n  return 'Unknown Platform';\n};\n\n// Collect all outputs / Alle Ausgaben sammeln\nallItems.forEach((item) => {\n  const platform = detectPlatform(item.json);\n  const hasError = item.json.error || item.json.errorMessage || false;\n  \n  results.push({\n    platform: platform,\n    success: !hasError,\n    data: item.json,\n    timestamp: new Date().toISOString()\n  });\n});\n\n// If no results collected, create summary from input / Falls keine Ergebnisse gesammelt, erstelle Zusammenfassung aus Eingabe\nif (results.length === 0 && inputData.eventTitle) {\n  results.push({\n    platform: 'No platforms enabled',\n    success: true,\n    data: { message: 'No platforms were enabled for posting' },\n    timestamp: new Date().toISOString()\n  });\n}\n\nreturn [{\n  json: {\n    eventTitle: inputData.eventTitle || 'Unknown Event',\n    eventDate: inputData.eventDate || '',\n    timestamp: new Date().toISOString(),\n    results: results,\n    summary: {\n      total: results.length,\n      successful: results.filter(r => r.success).length,\n      failed: results.filter(r => !r.success).length\n    }\n  }\n}];"
+        },
+        "id": "97d77af5-cb95-4e79-9dbc-4f5465933034",
+        "name": "📊 Collect Results",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1360,
+          80
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Collects and summarizes results from all posting operations.\nDE: Sammelt und fasst Ergebnisse aller Posting-Operationen zusammen."
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "merge-001",
+                "name": "finalResult",
+                "value": "={{ $json }}",
+                "type": "object"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "7a1bfea8-da8e-4890-b6b1-a1ebcacb814e",
+        "name": "🔀 Merge Results",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1680,
+          60
+        ],
+        "notesInFlow": true,
+        "notes": "EN: Merges all posting results into final output.\nDE: Führt alle Posting-Ergebnisse in finale Ausgabe zusammen."
+      },
+      {
+        "parameters": {
+          "content": "# 🚀 Multi-Platform Social Media & Email Publisher\n\n**EN:** This workflow publishes DJ events (or any events) to multiple social media platforms and sends emails simultaneously.\n\n**DE:** Dieser Workflow veröffentlicht DJ-Events (oder beliebige Events) auf mehreren Social-Media-Plattformen und sendet gleichzeitig E-Mails.\n\n## 📋 Supported Platforms / Unterstützte Plattformen\n\n- 🐦 **Twitter/X** - Text + Images\n- 📷 **Instagram** - Images + Captions\n- 👤 **Facebook** - Posts + Images\n- 💼 **LinkedIn** - Professional Posts\n- 🔴 **Reddit** - Subreddit Posts with Flairs\n- 📧 **Email** - HTML + Plain Text\n\n## ⚙️ How to Use / Verwendung\n\n1. **Configure Credentials** - See panels below for each platform\n2. **Send POST request** to webhook with event data\n3. **Enable/Disable platforms** via `publishTo` object\n\n## 📝 Input Format\n\nSee \"📥 Input Format\" panel below for complete example.\n\n---\n\n*(Doppelklick zum Bearbeiten | [n8n Sticky Notes Guide](https://docs.n8n.io/workflows/sticky-notes/))*",
+          "height": 600,
+          "width": 800,
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          840,
+          1120
+        ],
+        "id": "7db602f3-709c-4781-85ff-4058b26ab050",
+        "name": "📋 Overview"
+      },
+      {
+        "parameters": {
+          "content": "# 📥 Input Format / Eingabeformat\n\n## Required Fields / Pflichtfelder\n\n```json\n{\n  \"eventTitle\": \"DJ Night @ Club XYZ\",\n  \"eventDate\": \"2025-05-15\",\n  \"venue\": \"Club XYZ\",\n  \"city\": \"Berlin\"\n}\n```\n\n## Complete Example / Vollständiges Beispiel\n\n```json\n{\n  \"eventTitle\": \"Techno Night @ Berghain\",\n  \"eventDate\": \"2025-05-15\",\n  \"eventTime\": \"23:00\",\n  \"venue\": \"Berghain\",\n  \"city\": \"Berlin\",\n  \"description\": \"Join us for an unforgettable night!\",\n  \"imageUrl\": \"https://example.com/image.jpg\",\n  \"ticketUrl\": \"https://tickets.example.com\",\n  \"publishTo\": {\n    \"twitter\": true,\n    \"instagram\": true,\n    \"facebook\": true,\n    \"linkedin\": false,\n    \"reddit\": true,\n    \"email\": true\n  },\n  \"emailRecipients\": [\"fan@example.com\"],\n  \"redditSubreddit\": \"DJs\",\n  \"redditFlair\": \"Event\",\n  \"redditNsfw\": false,\n  \"redditSpoiler\": false\n}\n```\n\n---\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 700,
+          "width": 600
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          40,
+          640
+        ],
+        "id": "81bc09d9-249c-4cd8-a0d4-6bc617383bb5",
+        "name": "📥 Input Format"
+      },
+      {
+        "parameters": {
+          "content": "# 🔐 Credentials Setup / Credentials einrichten\n\n## ⚠️ WICHTIG: Separate Credentials!\n\n**Jede Plattform benötigt EIGENE Credentials!**\n\n## Checklist / Checkliste\n\n- [ ] **Twitter/X**: `TWITTER_CREDENTIALS_ID`\n- [ ] **Instagram**: `INSTAGRAM_CREDENTIALS_ID`\n- [ ] **Facebook**: `FACEBOOK_CREDENTIALS_ID`\n- [ ] **LinkedIn**: `LINKEDIN_CREDENTIALS_ID`\n- [ ] **Reddit**: `REDDIT_CREDENTIALS_ID`\n- [ ] **Email**: `SMTP_CREDENTIALS_ID`\n\n## 📚 Detailed Instructions\n\nSee individual credential panels below for each platform.\n\nSiehe einzelne Credential-Panels unten für jede Plattform.\n\n---\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 500,
+          "width": 600,
+          "color": 3
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          40,
+          1380
+        ],
+        "id": "a430f0b2-48de-4e60-931e-2efb38afd9f3",
+        "name": "🔐 Credentials Overview"
+      },
+      {
+        "parameters": {
+          "content": "# 🐦 Twitter/X Credentials\n\n## CREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH\n\n1. Go to: **https://developer.twitter.com/**\n2. Create App → **API Keys & Tokens**\n3. You need:\n   - **API Key** (Consumer Key)\n   - **API Secret** (Consumer Secret)\n   - **Access Token**\n   - **Access Token Secret**\n\n## In n8n:\n\n1. **Settings** → **Credentials** → **Add Credential**\n2. Select **Twitter OAuth1 API**\n3. Enter all 4 values\n4. Assign to node: **🐦 Post to Twitter/X**\n\n---\n\n**Credential ID:** `TWITTER_CREDENTIALS_ID`\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 450,
+          "width": 500,
+          "color": 2
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          1960,
+          600
+        ],
+        "id": "40af479b-b6e8-4c91-9403-45fef0d84ddd",
+        "name": "🐦 Twitter Credentials"
+      },
+      {
+        "parameters": {
+          "content": "# 📷 Instagram Credentials\n\n## CREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH\n\n⚠️ **Requires Facebook Business Account**\n\n1. Go to: **https://developers.facebook.com/**\n2. Create **Meta App** (Type: **Business**)\n3. Add **Instagram Graph API** product\n4. You need:\n   - **App ID**\n   - **App Secret**\n   - **Access Token** (with permissions)\n\n## In n8n:\n\n1. **Settings** → **Credentials** → **Add Credential**\n2. Select **Instagram OAuth2 API**\n3. Enter credentials\n4. Assign to node: **📷 Post to Instagram**\n\n---\n\n**Credential ID:** `INSTAGRAM_CREDENTIALS_ID`\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 710,
+          "width": 500,
+          "color": 2
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          1940,
+          1380
+        ],
+        "id": "b3009b1a-48aa-48f9-88ed-fb2de16a6139",
+        "name": "📷 Instagram Credentials"
+      },
+      {
+        "parameters": {
+          "content": "# 👤 Facebook Credentials\n\n## CREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH\n\n1. Go to: **https://developers.facebook.com/**\n2. Create **Meta App** (Type: **Business**)\n3. Add **Facebook Login** product\n4. You need:\n   - **App ID**\n   - **App Secret**\n   - **Page Access Token** (with `pages_manage_posts`)\n   - **Page ID** (set as env var `FACEBOOK_PAGE_ID`)\n\n## In n8n:\n\n1. **Settings** → **Credentials** → **Add Credential**\n2. Select **Facebook OAuth2 API**\n3. Enter credentials\n4. Set env var: `FACEBOOK_PAGE_ID=your_page_id`\n5. Assign to node: **👤 Post to Facebook Page**\n\n---\n\n**Credential ID:** `FACEBOOK_CREDENTIALS_ID`\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 680,
+          "width": 500,
+          "color": 2
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          2480,
+          1380
+        ],
+        "id": "d7800c4c-2ca1-4293-87ce-3487ee7ae24d",
+        "name": "👤 Facebook Credentials"
+      },
+      {
+        "parameters": {
+          "content": "# 💼 LinkedIn Credentials\n\n## CREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH\n\n1. Go to: **https://www.linkedin.com/developers/apps**\n2. Create new app\n3. You need:\n   - **Client ID**\n   - **Client Secret**\n4. Configure **OAuth Redirect URL**:\n   `https://your-n8n-instance.com/rest/oauth2-credential/callback`\n5. Request permissions: `w_member_social`, `w_organization_social`\n\n## In n8n:\n\n1. **Settings** → **Credentials** → **Add Credential**\n2. Select **LinkedIn OAuth2 API**\n3. Enter Client ID and Secret\n4. Complete OAuth flow\n5. Assign to node: **💼 Post to LinkedIn**\n\n---\n\n**Credential ID:** `LINKEDIN_CREDENTIALS_ID`\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 500,
+          "width": 500,
+          "color": 2
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          2520,
+          600
+        ],
+        "id": "397c96f4-033d-4832-ab29-231772b73e60",
+        "name": "💼 LinkedIn Credentials"
+      },
+      {
+        "parameters": {
+          "content": "# 🔴 Reddit Credentials\n\n## CREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH\n\n1. Go to: **https://www.reddit.com/prefs/apps**\n2. Click **\"create app\"**\n3. Fill in:\n   - **Name**: Your app name\n   - **App type**: **\"script\"**\n   - **Redirect URI**: `http://localhost:8080`\n4. Note:\n   - **Client ID** (under app name)\n   - **Client Secret** (only shown once!)\n5. Get OAuth Token:\n   - Use: https://not-an-aardvark.github.io/reddit-oauth-helper/\n   - Token format: `Bearer YOUR_ACCESS_TOKEN`\n\n## In n8n:\n\n1. **Settings** → **Credentials** → **Add Credential**\n2. Select **HTTP Header Auth**\n3. Configure:\n   - **Name**: `Authorization`\n   - **Value**: `Bearer YOUR_ACCESS_TOKEN`\n4. Assign to node: **🔴 Post to Reddit**\n\n---\n\n**Credential ID:** `REDDIT_CREDENTIALS_ID`\n\n**Reddit Fields:**\n- `redditSubreddit`: Required (e.g., \"DJs\")\n- `redditFlair`: Optional\n- `redditNsfw`: true/false\n- `redditSpoiler`: true/false\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 960,
+          "width": 500,
+          "color": 2
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          3060,
+          1380
+        ],
+        "id": "f037e98b-6d8f-4dc9-8200-5ccecb4190c3",
+        "name": "🔴 Reddit Credentials"
+      },
+      {
+        "parameters": {
+          "content": "# 📧 Email (SMTP) Credentials\n\n## CREDENTIALS REQUIRED / CREDENTIALS ERFORDERLICH\n\n### Gmail:\n1. Enable **2-Factor Authentication**\n2. Go to: **https://myaccount.google.com/apppasswords**\n3. Generate **App Password** for \"Mail\"\n4. Use this password (not your regular password)\n\n### SMTP Settings:\n- **Host**: `smtp.gmail.com`\n- **Port**: `587` (TLS) or `465` (SSL)\n- **User**: your-email@gmail.com\n- **Password**: App Password (for Gmail)\n\n## In n8n:\n\n1. **Settings** → **Credentials** → **Add Credential**\n2. Select **SMTP**\n3. Enter SMTP settings\n4. Optional: Set `EMAIL_FROM` env var\n5. Assign to node: **📧 Send Email**\n\n---\n\n**Credential ID:** `SMTP_CREDENTIALS_ID`\n\n**Other Providers:**\n- Outlook: `smtp.office365.com`\n- Custom: Use your provider's SMTP settings\n\n*(Doppelklick zum Bearbeiten)*",
+          "height": 550,
+          "width": 500,
+          "color": 2
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          3140,
+          580
+        ],
+        "id": "05a72098-4e00-42e8-8948-3e16dd489e35",
+        "name": "📧 Email Credentials"
+      }
+    ],
+    "connections": {
+      "📥 Webhook Trigger": {
+        "main": [
+          [
+            {
+              "node": "🔍 Validate & Prepare Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔍 Validate & Prepare Data": {
+        "main": [
+          [
+            {
+              "node": "✏️ Format Content for Platforms",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "✏️ Format Content for Platforms": {
+        "main": [
+          [
+            {
+              "node": "🐦 Post to Twitter/X?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "📷 Post to Instagram?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "👤 Post to Facebook?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "💼 Post to LinkedIn?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "📧 Send Email?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "🔴 Post to Reddit?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🐦 Post to Twitter/X?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📷 Post to Instagram?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "👤 Post to Facebook?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "💼 Post to LinkedIn?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📧 Send Email?": {
+        "main": [
+          [
+            {
+              "node": "📧 Send Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📧 Send Email": {
+        "main": [
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔴 Post to Reddit?": {
+        "main": [
+          [
+            {
+              "node": "🔴 Post to Reddit",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔴 Post to Reddit": {
+        "main": [
+          [
+            {
+              "node": "📊 Collect Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📊 Collect Results": {
+        "main": [
+          [
+            {
+              "node": "🔀 Merge Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔀 Merge Results": {
+        "main": [
+          [
+            {
+              "node": "✅ Webhook Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "pinData": {},
+    "meta": {
+      "instanceId": "7302af2d76ff11fa25dfe4c4b676102587b05b140a7ac12e86e85bb8179e9e38"
+    }
+  }
