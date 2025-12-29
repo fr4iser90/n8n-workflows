@@ -395,6 +395,49 @@
       },
       "position": [680, -400],
       "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "✅ Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1760, -940]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sendTo": "user",
+        "userId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [1760, -780],
+      "id": "discord-notification",
+      "name": "Discord"
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1760, -1100],
+      "id": "telegram-notification",
+      "name": "Telegram"
     }
   ],
   "connections": {
@@ -697,6 +740,16 @@
     "send-notifications": {
       "main": [
         [
+          {
+            "node": "discord-notification",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "telegram-notification",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "merge-results",
             "type": "main",

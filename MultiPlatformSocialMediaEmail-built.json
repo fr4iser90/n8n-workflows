@@ -78,19 +78,34 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
       "position": [
-        100,
-        80
+        -1260,
+        -1020
       ]
     },
     {
       "parameters": {},
       "id": "ea301d6b-af9d-d8d8-48c3-9743977a93a1",
-      "name": "🖱️ Manual Trigger (Quick Post)",
+      "name": "📁 Manual File Path Input",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        100,
-        -80
+        -1260,
+        -1220
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "id": "8f373439-4051-c8bd-4a4f-b129018dd32c",
+      "name": "📄 Read File from Path",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        -1220
       ]
     },
     {
@@ -102,8 +117,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
-        -80
+        -840,
+        -1220
       ]
     },
     {
@@ -119,8 +134,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 1,
       "position": [
-        100,
-        200
+        -1280,
+        -600
       ]
     },
     {
@@ -134,8 +149,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        260,
-        80
+        -1280,
+        -800
       ],
       "webhookId": "dj-event-webhook"
     },
@@ -148,8 +163,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        2560,
-        0
+        1720,
+        -940
       ]
     },
     {
@@ -161,8 +176,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
-        80
+        -560,
+        -920
       ]
     },
     {
@@ -174,8 +189,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        520,
-        80
+        -360,
+        -920
       ]
     },
     {
@@ -187,8 +202,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        640,
-        80
+        -140,
+        -920
       ]
     },
     {
@@ -200,8 +215,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        760,
-        80
+        80,
+        -920
       ]
     },
     {
@@ -213,8 +228,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        80
+        260,
+        -920
       ]
     },
     {
@@ -226,8 +241,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1360,
-        80
+        1080,
+        -940
       ]
     },
     {
@@ -239,8 +254,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1480,
-        80
+        1240,
+        -940
       ]
     },
     {
@@ -252,8 +267,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1600,
-        80
+        1400,
+        -940
       ]
     },
     {
@@ -272,8 +287,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1680,
-        60
+        1560,
+        -940
       ]
     },
     {
@@ -292,19 +307,21 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        980,
-        -120
+        420,
+        -1340
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "additionalFields": {}
+      },
       "id": "2c3fe310-333f-277b-4f32-ab8676d78d8b",
       "name": "🐦 Post to Twitter/X",
       "type": "n8n-nodes-base.twitter",
-      "typeVersion": 2.1,
+      "typeVersion": 2,
       "position": [
-        1140,
-        -20
+        680,
+        -1340
       ]
     },
     {
@@ -323,19 +340,21 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        920,
-        80
+        420,
+        -1160
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "additionalFields": {}
+      },
       "id": "0088e969-08ca-7f61-457e-9b96c9b9ae29",
       "name": "📷 Post to Instagram",
       "type": "n8n-nodes-base.instagram",
       "typeVersion": 1,
       "position": [
-        1140,
-        80
+        680,
+        -1160
       ]
     },
     {
@@ -354,19 +373,21 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        920,
-        180
+        420,
+        -960
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "additionalFields": {}
+      },
       "id": "bc4d5d06-12ab-45fd-4c7d-81ec0d2322db",
       "name": "👤 Post to Facebook Page",
       "type": "n8n-nodes-base.facebook",
       "typeVersion": 2.1,
       "position": [
-        1140,
-        180
+        680,
+        -960
       ]
     },
     {
@@ -385,19 +406,21 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        920,
-        280
+        420,
+        -780
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "additionalFields": {}
+      },
       "id": "f9b38ec4-95d1-2ef2-4fa3-90e70845597a",
       "name": "💼 Post to LinkedIn",
       "type": "n8n-nodes-base.linkedIn",
-      "typeVersion": 2,
+      "typeVersion": 1,
       "position": [
-        1140,
-        280
+        680,
+        -780
       ]
     },
     {
@@ -416,8 +439,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        920,
-        380
+        420,
+        -600
       ]
     },
     {
@@ -435,8 +458,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1140,
-        380
+        680,
+        -600
       ]
     },
     {
@@ -455,45 +478,77 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        920,
-        620
+        420,
+        -400
       ]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://www.reddit.com/api/submit",
-        "sendBody": true,
-        "bodyContentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "sr",
-              "value": "={{ $json.redditSubreddit }}"
-            },
-            {
-              "name": "title",
-              "value": "={{ $json.eventTitle }}"
-            },
-            {
-              "name": "text",
-              "value": "={{ $json.redditText }}"
-            },
-            {
-              "name": "kind",
-              "value": "self"
-            }
-          ]
-        },
-        "options": {}
+        "resource": "post",
+        "subreddit": "={{ $json.redditSubreddit }}",
+        "title": "={{ $json.eventTitle }}",
+        "text": "={{ $json.redditText }}",
+        "additionalFields": {}
       },
       "id": "ebab7789-9a78-84d0-4746-823b1570e99c",
       "name": "🔴 Post to Reddit",
-      "type": "n8n-nodes-base.httpRequest",
+      "type": "n8n-nodes-base.reddit",
       "typeVersion": 1,
       "position": [
-        1140,
-        620
+        680,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "id": "0b96c802-0f57-4ef6-4700-89c6caae9042",
+      "name": "✅ Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -940
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sendTo": "user",
+        "userId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "eb638535-6f25-008d-414d-b30fe88ce5fd",
+      "name": "Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        -780
+      ]
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "id": "66f72527-2972-c9f2-4838-a0bb98dd78d1",
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1760,
+        -1100
       ]
     },
     {
@@ -506,8 +561,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        840,
-        1120
+        380,
+        100
       ],
       "id": "overview",
       "name": "📋 Overview"
@@ -522,8 +577,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
-        640
+        -420,
+        -380
       ],
       "id": "input-format",
       "name": "📥 Input Format"
@@ -538,8 +593,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        40,
-        1380
+        -420,
+        360
       ],
       "id": "credentials-overview",
       "name": "🔐 Credentials Overview"
@@ -554,8 +609,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1960,
-        600
+        1500,
+        -420
       ],
       "id": "twitter-credentials",
       "name": "🐦 Twitter Credentials"
@@ -570,8 +625,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        1940,
-        1380
+        1480,
+        360
       ],
       "id": "instagram-credentials",
       "name": "📷 Instagram Credentials"
@@ -586,8 +641,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2480,
-        1380
+        2020,
+        360
       ],
       "id": "facebook-credentials",
       "name": "👤 Facebook Credentials"
@@ -602,8 +657,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        2520,
-        600
+        2060,
+        -420
       ],
       "id": "linkedin-credentials",
       "name": "💼 LinkedIn Credentials"
@@ -618,8 +673,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3060,
-        1380
+        2600,
+        360
       ],
       "id": "reddit-credentials",
       "name": "🔴 Reddit Credentials"
@@ -634,8 +689,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3140,
-        580
+        2680,
+        -440
       ],
       "id": "email-credentials",
       "name": "📧 Email Credentials"
@@ -650,8 +705,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        3700,
-        1380
+        3240,
+        360
       ],
       "id": "discord-telegram-setup",
       "name": "📢 Discord & Telegram Setup"
@@ -669,7 +724,18 @@
         ]
       ]
     },
-    "🖱️ Manual Trigger (Quick Post)": {
+    "📁 Manual File Path Input": {
+      "main": [
+        [
+          {
+            "node": "📄 Read File from Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Read File from Path": {
       "main": [
         [
           {
@@ -946,6 +1012,16 @@
     "📢 Send Notifications": {
       "main": [
         [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "🔀 Merge Results",
             "type": "main",
