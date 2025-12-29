@@ -4,12 +4,133 @@
   "nodes": [
     {
       "parameters": {
+        "formTitle": "Neues Event erstellen",
+        "formDescription": "Fülle alle Felder aus für die automatische Veröffentlichung auf Social Media",
+        "options": {
+          "formElements": [
+            {
+              "fieldLabel": "Event Titel",
+              "fieldName": "eventTitle",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "z.B. Berghain Techno Night"
+            },
+            {
+              "fieldLabel": "Datum",
+              "fieldName": "eventDate",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Uhrzeit",
+              "fieldName": "eventTime",
+              "fieldType": "text",
+              "placeholder": "22:00",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Veranstaltungsort",
+              "fieldName": "venue",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "z.B. Berghain"
+            },
+            {
+              "fieldLabel": "Stadt",
+              "fieldName": "city",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "z.B. Berlin"
+            },
+            {
+              "fieldLabel": "Beschreibung",
+              "fieldName": "description",
+              "fieldType": "textarea",
+              "requiredField": false,
+              "placeholder": "Erzähl etwas über das Event..."
+            },
+            {
+              "fieldLabel": "Bild-URL",
+              "fieldName": "imageUrl",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "https://example.com/image.jpg"
+            },
+            {
+              "fieldLabel": "Ticket-URL",
+              "fieldName": "ticketUrl",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "https://tickets.example.com"
+            },
+            {
+              "fieldLabel": "Email-Empfänger",
+              "fieldName": "emailRecipient",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "deine@email.com"
+            }
+          ]
+        }
+      },
+      "id": "2f08c34e-7bd4-f408-424d-92227372bb92",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        100,
+        80
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ea301d6b-af9d-d8d8-48c3-9743977a93a1",
+      "name": "🖱️ Manual Trigger (Quick Post)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        100,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// EN: Parse manual input - detect markdown or images\n// DE: Manuelle Eingabe parsen - Markdown oder Bilder erkennen\n\nconst item = $input.item.json;\n\n// Check if input is markdown or just text\nlet content = item.content || item.text || '';\n\n// Detect if content is an image URL\nconst imageUrlRegex = /(https?:\\/\\/.*\\.(?:png|jpg|jpeg|gif|webp|svg))/i;\nconst imageMatch = content.match(imageUrlRegex);\n\n// Detect if content is markdown\nconst isMarkdown = content.includes('#') || content.includes('*') || content.includes('[') || content.includes('![');\n\nlet parsedData = {};\n\nif (imageMatch && content.trim() === imageMatch[0]) {\n  // Content is JUST an image URL\n  parsedData = {\n    eventTitle: \"Quick Image Post\",\n    eventDate: new Date().toISOString().split('T')[0], // Today's date\n    eventTime: \"12:00\",\n    venue: \"Online\",\n    city: \"Digital\",\n    description: \"Shared image\",\n    imageUrl: imageMatch[0],\n    ticketUrl: \"\",\n    emailRecipient: \"default@email.com\",\n    publishTo: {\n      twitter: true,\n      instagram: true,\n      facebook: false,\n      linkedin: false,\n      reddit: false,\n      email: false\n    },\n    emailRecipients: [\"default@email.com\"],\n    source: 'manual-image'\n  };\n} else if (isMarkdown) {\n  // Parse markdown content\n  // Simple markdown parser for event data\n  const lines = content.split('\\n');\n  let title = '';\n  let date = '';\n  let time = '22:00';\n  let venue = '';\n  let city = '';\n  let description = '';\n  let imageUrl = '';\n  let ticketUrl = '';\n\n  for (const line of lines) {\n    const trimmed = line.trim();\n    if (trimmed.startsWith('# ')) {\n      title = trimmed.substring(2).trim();\n    } else if (trimmed.includes('Date:') || trimmed.includes('Datum:')) {\n      date = trimmed.split(':')[1]?.trim() || '';\n    } else if (trimmed.includes('Time:') || trimmed.includes('Uhrzeit:')) {\n      time = trimmed.split(':')[1]?.trim() || '22:00';\n    } else if (trimmed.includes('Venue:') || trimmed.includes('Ort:')) {\n      venue = trimmed.split(':')[1]?.trim() || '';\n    } else if (trimmed.includes('City:') || trimmed.includes('Stadt:')) {\n      city = trimmed.split(':')[1]?.trim() || '';\n    } else if (trimmed.includes('Image:') || trimmed.includes('Bild:')) {\n      imageUrl = trimmed.split(':')[1]?.trim() || '';\n    } else if (trimmed.includes('Tickets:') || trimmed.includes('Tickets:')) {\n      ticketUrl = trimmed.split(':')[1]?.trim() || '';\n    } else if (trimmed && !trimmed.startsWith('#') && !trimmed.includes(':')) {\n      description += trimmed + ' ';\n    }\n  }\n\n  parsedData = {\n    eventTitle: title || \"Manual Event Post\",\n    eventDate: date || new Date().toISOString().split('T')[0],\n    eventTime: time,\n    venue: venue || \"TBA\",\n    city: city || \"TBA\",\n    description: description.trim() || \"Event description\",\n    imageUrl: imageUrl,\n    ticketUrl: ticketUrl,\n    emailRecipient: \"default@email.com\",\n    publishTo: {\n      twitter: true,\n      instagram: true,\n      facebook: false,\n      linkedin: false,\n      reddit: false,\n      email: false\n    },\n    emailRecipients: [\"default@email.com\"],\n    source: 'manual-markdown'\n  };\n} else {\n  // Plain text - treat as description\n  parsedData = {\n    eventTitle: \"Quick Text Post\",\n    eventDate: new Date().toISOString().split('T')[0],\n    eventTime: \"12:00\",\n    venue: \"Online\",\n    city: \"Digital\",\n    description: content,\n    imageUrl: \"\",\n    ticketUrl: \"\",\n    emailRecipient: \"default@email.com\",\n    publishTo: {\n      twitter: true,\n      instagram: false,\n      facebook: false,\n      linkedin: false,\n      reddit: false,\n      email: false\n    },\n    emailRecipients: [\"default@email.com\"],\n    source: 'manual-text'\n  };\n}\n\nreturn [{\n  json: parsedData\n}];\n"
+      },
+      "id": "4362bd96-78ab-b408-41e7-a174e39d6ba3",
+      "name": "🔍 Parse Manual Input (Markdown/Image)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "path": "/upload-event",
+        "options": {
+          "formData": true
+        }
+      },
+      "id": "e4f25b0a-eee9-3d5d-4207-b3d68a4cb86f",
+      "name": "📎 File Upload (PDF/PNG/JPG)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        100,
+        200
+      ]
+    },
+    {
+      "parameters": {
         "httpMethod": "POST",
         "path": "dj-event",
         "responseMode": "responseNode"
       },
       "id": "db1cb1a8-09b5-b190-4903-8a112cff091b",
-      "name": "📥 Webhook Trigger",
+      "name": "📥 Webhook Trigger (API)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
@@ -565,7 +686,51 @@
     }
   ],
   "connections": {
-    "📥 Webhook Trigger": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "🔍 Validate & Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🖱️ Manual Trigger (Quick Post)": {
+      "main": [
+        [
+          {
+            "node": "🔍 Parse Manual Input (Markdown/Image)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔍 Parse Manual Input (Markdown/Image)": {
+      "main": [
+        [
+          {
+            "node": "🔍 Validate & Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📎 File Upload (PDF/PNG/JPG)": {
+      "main": [
+        [
+          {
+            "node": "🔍 Validate & Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Webhook Trigger (API)": {
       "main": [
         [
           {

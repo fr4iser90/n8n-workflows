@@ -1,0 +1,171 @@
+## 🎯 **TODO-LISTE: Vollständiges Setup des Multi-Platform Posting-Systems**
+
+### **Phase 1: Credentials & Testing (heute)**
+
+#### ✅ **1. Email-Setup testen**
+- [ ] **Gmail App-Password erstellen** (wenn Gmail verwendet)
+- [ ] **SMTP-Credentials in n8n eintragen:**
+  ```bash
+  Host: smtp.gmail.com
+  Port: 587
+  User: deine-email@gmail.com
+  Password: dein-app-password
+  ```
+- [ ] **EMAIL_FROM Environment Variable setzen:** `noreply@deine-domain.com`
+- [ ] **Test-Email senden** mit Postman/curl:
+  ```bash
+  curl -X POST http://localhost:5678/webhook/dj-event \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventTitle": "TEST EVENT",
+    "eventDate": "2025-01-01",
+    "eventTime": "20:00",
+    "venue": "Test Venue",
+    "city": "Test City",
+    "description": "Test description",
+    "emailRecipients": ["deine-email@gmail.com"],
+    "publishTo": {
+      "email": true,
+      "twitter": false,
+      "instagram": false,
+      "facebook": false,
+      "linkedin": false,
+      "reddit": false
+    }
+  }'
+  ```
+
+#### ✅ **2. Twitter/X Setup**
+- [ ] **Twitter Developer Account** erstellen: https://developer.twitter.com/
+- [ ] **App erstellen** und API Keys bekommen
+- [ ] **OAuth1 Credentials in n8n eintragen:**
+  - API Key
+  - API Secret  
+  - Access Token
+  - Access Token Secret
+- [ ] **Test-Post senden** (nur Twitter aktiviert)
+
+#### ✅ **3. Instagram Setup**
+- [ ] **Meta Business Account** erstellen
+- [ ] **Instagram Graph API** aktivieren
+- [ ] **OAuth2 Credentials in n8n eintragen**
+- [ ] **Facebook Page verknüpfen** (für Instagram Business)
+- [ ] **Test-Post mit Bild senden**
+
+#### ✅ **4. Facebook Setup**
+- [ ] **Meta App erstellen** (Business Type)
+- [ ] **Facebook Login** Product hinzufügen
+- [ ] **Page Access Token** mit `pages_manage_posts` Permission
+- [ ] **FACEBOOK_PAGE_ID** Environment Variable setzen
+- [ ] **Test-Post senden**
+
+#### ✅ **5. LinkedIn Setup**
+- [ ] **LinkedIn Developer Account:** https://www.linkedin.com/developers/apps
+- [ ] **OAuth2 App erstellen**
+- [ ] **Redirect URL setzen:** `https://deine-n8n-url/rest/oauth2-credential/callback`
+- [ ] **Permissions:** `w_member_social`, `w_organization_social`
+- [ ] **Test-Post senden**
+
+#### ✅ **6. Reddit Setup**
+- [ ] **Reddit App erstellen:** https://www.reddit.com/prefs/apps
+- [ ] **Script-Type App** wählen
+- [ ] **Client ID & Secret** notieren
+- [ ] **OAuth Token generieren:** https://not-an-aardvark.github.io/reddit-oauth-helper/
+- [ ] **HTTP Header Auth in n8n:** `Authorization: Bearer DEIN_TOKEN`
+- [ ] **REDDIT_USER_AGENT** Environment Variable setzen
+- [ ] **Test-Post in Test-Subreddit senden**
+
+### **Phase 2: Discord/Telegram Notifications**
+
+#### 📢 **7. Discord Webhook**
+- [ ] **Discord Server erstellen/verwenden**
+- [ ] **Channel auswählen** → Integrations → Webhooks → Create Webhook
+- [ ] **Webhook URL kopieren**
+- [ ] **DISCORD_WEBHOOK_URL** Environment Variable setzen
+- [ ] **Test-Notification empfangen**
+
+#### 📱 **8. Telegram Bot**
+- [ ] **@BotFather kontaktieren** und `/newbot` senden
+- [ ] **Bot erstellen** und Token bekommen
+- [ ] **Bot mit `/start` message testen**
+- [ ] **Chat-ID herausfinden:** Bot message senden, dann `https://api.telegram.org/bot<TOKEN>/getUpdates`
+- [ ] **TELEGRAM_BOT_TOKEN** und **TELEGRAM_CHAT_ID** Environment Variables setzen
+- [ ] **Test-Notification empfangen**
+
+### **Phase 3: Production & Monitoring**
+
+#### 🔧 **9. Environment Variables**
+```bash
+# In n8n Settings → Environment Variables
+EMAIL_FROM=noreply@deine-domain.com
+FACEBOOK_PAGE_ID=123456789
+REDDIT_USER_AGENT=n8n-workflow/1.0
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+TELEGRAM_BOT_TOKEN=123456789:ABC...
+TELEGRAM_CHAT_ID=987654321
+```
+
+#### 📊 **10. Monitoring & Logging**
+- [ ] **n8n Logs überwachen** für Fehler
+- [ ] **Discord/Telegram** Notifications testen
+- [ ] **Rate Limits** beachten (Twitter: 300/3h, etc.)
+- [ ] **Backup-Strategie** für Credentials
+
+#### 🚀 **11. Production Testing**
+- [ ] **Vollständigen Event-Post testen** (alle Plattformen)
+- [ ] **Fehlerbehandlung** testen (z.B. invalide URLs)
+- [ ] **Performance** messen (Antwortzeiten)
+- [ ] **Retry-Mechanismen** testen
+
+### **Phase 4: Erweiterungen (optional)**
+
+#### 🎨 **12. Content-Optimierung**
+- [ ] **Bild-Kompression** hinzufügen
+- [ ] **Hashtag-Optimierung** verbessern
+- [ ] **Link-Shortening** integrieren
+- [ ] **Mehrsprachige Posts** unterstützen
+
+#### 🤖 **13. Automation**
+- [ ] **Event-Kalender Integration** (Google Calendar, etc.)
+- [ ] **Automatische Bild-Generierung** (für Events ohne Bilder)
+- [ ] **Social Media Analytics** integrieren
+- [ ] **A/B Testing** für Post-Texte
+
+#### 🛡️ **14. Sicherheit & Compliance**
+- [ ] **Credential-Rotation** implementieren
+- [ ] **Rate Limiting** pro Plattform
+- [ ] **Content-Moderation** hinzufügen
+- [ ] **GDPR-Compliance** sicherstellen
+
+---
+
+## 🎯 **Schnellstart für Testing:**
+
+### **Schritt 1: Email testen**
+```bash
+# n8n starten
+n8n start
+
+# Test-Request senden
+curl -X POST http://localhost:5678/webhook/dj-event \
+-H "Content-Type: application/json" \
+-d '{"eventTitle":"TEST","eventDate":"2025-01-01","venue":"Test","city":"Test","emailRecipients":["deine@email.com"],"publishTo":{"email":true}}'
+```
+
+### **Schritt 2: Credentials hinzufügen**
+- Öffne n8n UI: http://localhost:5678
+- Settings → Credentials → Add Credential
+- Plattform für Plattform konfigurieren
+
+### **Schritt 3: Vollständig testen**
+- Alle Plattformen aktivieren
+- Vollständigen Event-Post senden
+- Notifications in Discord/Telegram prüfen
+
+---
+
+**Wie viele dieser Schritte möchtest du angehen?** 🤔
+
+**Beginnen wir mit Email-Testing?** 📧
+
+*(Die Liste ist umfassend - wir können uns auf die wichtigsten konzentrieren)*

@@ -184,6 +184,7 @@ function getNodeType(type) {
     'respondToWebhook': 'n8n-nodes-base.respondToWebhook',
     'code': 'n8n-nodes-base.code',
     'if': 'n8n-nodes-base.if',
+    'formTrigger': 'n8n-nodes-base.formTrigger',
     'twitter': 'n8n-nodes-base.twitter',
     'instagram': 'n8n-nodes-base.instagram',
     'facebook': 'n8n-nodes-base.facebook',

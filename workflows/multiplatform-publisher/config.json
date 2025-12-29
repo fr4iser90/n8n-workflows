@@ -6,8 +6,113 @@
   "platforms": ["twitter", "instagram", "facebook", "linkedin", "reddit", "email"],
   "nodes": [
     {
+      "id": "form-trigger",
+      "name": "On form submission",
+      "type": "formTrigger",
+      "typeVersion": 2.2,
+      "parameters": {
+        "formTitle": "Neues Event erstellen",
+        "formDescription": "Fülle alle Felder aus für die automatische Veröffentlichung auf Social Media",
+        "options": {
+          "formElements": [
+            {
+              "fieldLabel": "Event Titel",
+              "fieldName": "eventTitle",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "z.B. Berghain Techno Night"
+            },
+            {
+              "fieldLabel": "Datum",
+              "fieldName": "eventDate",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Uhrzeit",
+              "fieldName": "eventTime",
+              "fieldType": "text",
+              "placeholder": "22:00",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Veranstaltungsort",
+              "fieldName": "venue",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "z.B. Berghain"
+            },
+            {
+              "fieldLabel": "Stadt",
+              "fieldName": "city",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "z.B. Berlin"
+            },
+            {
+              "fieldLabel": "Beschreibung",
+              "fieldName": "description",
+              "fieldType": "textarea",
+              "requiredField": false,
+              "placeholder": "Erzähl etwas über das Event..."
+            },
+            {
+              "fieldLabel": "Bild-URL",
+              "fieldName": "imageUrl",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "https://example.com/image.jpg"
+            },
+            {
+              "fieldLabel": "Ticket-URL",
+              "fieldName": "ticketUrl",
+              "fieldType": "text",
+              "requiredField": false,
+              "placeholder": "https://tickets.example.com"
+            },
+            {
+              "fieldLabel": "Email-Empfänger",
+              "fieldName": "emailRecipient",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "deine@email.com"
+            }
+          ]
+        }
+      },
+      "position": [100, 80]
+    },
+    {
+      "id": "manual-trigger",
+      "name": "🖱️ Manual Trigger (Quick Post)",
+      "type": "manualTrigger",
+      "parameters": {},
+      "position": [100, -80]
+    },
+    {
+      "id": "parse-manual-input",
+      "name": "🔍 Parse Manual Input (Markdown/Image)",
+      "type": "code",
+      "script": "parse-manual-input.js",
+      "position": [220, -80],
+      "typeVersion": 2
+    },
+    {
+      "id": "file-upload-trigger",
+      "name": "📎 File Upload (PDF/PNG/JPG)",
+      "type": "httpRequest",
+      "parameters": {
+        "method": "POST",
+        "path": "/upload-event",
+        "options": {
+          "formData": true
+        }
+      },
+      "position": [100, 200]
+    },
+    {
       "id": "webhook-trigger",
-      "name": "📥 Webhook Trigger",
+      "name": "📥 Webhook Trigger (API)",
       "type": "webhook",
       "parameters": {
         "httpMethod": "POST",
@@ -321,7 +426,51 @@
     }
   ],
   "connections": {
-    "webhook-trigger": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "validate-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🖱️ Manual Trigger (Quick Post)": {
+      "main": [
+        [
+          {
+            "node": "parse-manual-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse-manual-input": {
+      "main": [
+        [
+          {
+            "node": "validate-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📎 File Upload (PDF/PNG/JPG)": {
+      "main": [
+        [
+          {
+            "node": "validate-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📥 Webhook Trigger (API)": {
       "main": [
         [
           {
