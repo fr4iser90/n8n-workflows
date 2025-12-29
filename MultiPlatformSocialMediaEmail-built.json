@@ -300,7 +300,8 @@
               "value2": true
             }
           ]
-        }
+        },
+        "additionalFields": {}
       },
       "id": "9b235081-7c85-c87b-4929-becf7057566d",
       "name": "🐦 Post to Twitter/X?",
@@ -333,7 +334,8 @@
               "value2": true
             }
           ]
-        }
+        },
+        "additionalFields": {}
       },
       "id": "780e148d-85b9-639f-4d15-836c6d558325",
       "name": "📷 Post to Instagram?",
@@ -366,7 +368,8 @@
               "value2": true
             }
           ]
-        }
+        },
+        "additionalFields": {}
       },
       "id": "2b3674c3-9ad8-5f3b-4b8a-8844a4829632",
       "name": "👤 Post to Facebook?",
@@ -399,7 +402,8 @@
               "value2": true
             }
           ]
-        }
+        },
+        "additionalFields": {}
       },
       "id": "fc65904b-3706-7780-4226-b3416b384a85",
       "name": "💼 Post to LinkedIn?",
@@ -485,7 +489,7 @@
     {
       "parameters": {
         "resource": "post",
-        "subreddit": "={{ $json.redditSubreddit }}",
+        "subreddit": "DJs",
         "title": "={{ $json.eventTitle }}",
         "text": "={{ $json.redditText }}",
         "additionalFields": {}

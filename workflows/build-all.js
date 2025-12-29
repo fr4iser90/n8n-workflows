@@ -45,7 +45,11 @@ function buildAllWorkflows() {
   // Build each workflow
   for (const workflowDir of workflowDirs) {
     const workflowPath = path.join(workflowsDir, workflowDir);
-    const buildScript = path.join(workflowPath, 'build.js');
+    // Try core/build.js first, then fallback to build.js
+    let buildScript = path.join(workflowPath, 'core', 'build.js');
+    if (!fs.existsSync(buildScript)) {
+      buildScript = path.join(workflowPath, 'build.js');
+    }
 
     if (!fs.existsSync(buildScript)) {
       console.log(`⚠️  Skipping ${workflowDir} - no build.js found`);
@@ -54,7 +58,11 @@ function buildAllWorkflows() {
 
     try {
       console.log(`🔨 Building ${workflowDir}...`);
-      execSync(`cd "${workflowPath}" && node build.js`, {
+      // Determine which build command to use
+      const hasCoreBuild = fs.existsSync(path.join(workflowPath, 'core', 'build.js'));
+      const buildCommand = hasCoreBuild ? 'node core/build.js' : 'node build.js';
+
+      execSync(`cd "${workflowPath}" && ${buildCommand}`, {
         stdio: 'inherit',
         timeout: 30000
       });
