@@ -296,8 +296,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.publishTo.twitter }}",
-              "value2": true
+              "value1": "={{ $json.publishTo.twitter }}"
             }
           ]
         },
@@ -330,8 +329,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.publishTo.instagram }}",
-              "value2": true
+              "value1": "={{ $json.publishTo.instagram }}"
             }
           ]
         },
@@ -364,8 +362,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.publishTo.facebook }}",
-              "value2": true
+              "value1": "={{ $json.publishTo.facebook }}"
             }
           ]
         },
@@ -398,8 +395,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.publishTo.linkedin }}",
-              "value2": true
+              "value1": "={{ $json.publishTo.linkedin }}"
             }
           ]
         },
@@ -432,8 +428,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.publishTo.email && $json.emailRecipients && $json.emailRecipients.length > 0 }}",
-              "value2": true
+              "value1": "={{ $json.publishTo.email && $json.emailRecipients && $json.emailRecipients.length > 0 }}"
             }
           ]
         }
@@ -471,8 +466,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.publishTo.reddit && $json.redditSubreddit }}",
-              "value2": true
+              "value1": "={{ $json.publishTo.reddit && $json.redditSubreddit }}"
             }
           ]
         }
@@ -780,7 +774,8 @@
             "type": "main",
             "index": 0
           }
-        ]
+        ],
+        []
       ]
     },
     "📧 Send Email": {
@@ -885,70 +880,52 @@
         ]
       ]
     },
-    "twitter-check": {
-      "main": [
-        [],
-        [
-          {
-            "node": "📊 Collect Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "instagram-check": {
-      "main": [
-        [],
-        [
-          {
-            "node": "📊 Collect Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "facebook-check": {
-      "main": [
-        [],
-        [
-          {
-            "node": "📊 Collect Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "linkedin-check": {
-      "main": [
-        [],
-        [
-          {
-            "node": "📊 Collect Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "email-check": {
+    "🐦 Post to Twitter/X?": {
       "main": [
         [
           {
-            "node": "📧 Send Email",
+            "node": "🐦 Post to Twitter/X",
             "type": "main",
             "index": 0
           }
         ],
+        []
+      ]
+    },
+    "📷 Post to Instagram?": {
+      "main": [
         [
           {
-            "node": "📊 Collect Results",
+            "node": "📷 Post to Instagram",
             "type": "main",
             "index": 0
           }
-        ]
+        ],
+        []
+      ]
+    },
+    "👤 Post to Facebook?": {
+      "main": [
+        [
+          {
+            "node": "👤 Post to Facebook Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "💼 Post to LinkedIn?": {
+      "main": [
+        [
+          {
+            "node": "💼 Post to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     },
     "email-send": {
@@ -962,7 +939,7 @@
         ]
       ]
     },
-    "reddit-check": {
+    "🔴 Post to Reddit?": {
       "main": [
         [
           {
@@ -971,6 +948,55 @@
             "index": 0
           }
         ],
+        []
+      ]
+    },
+    "🐦 Post to Twitter/X": {
+      "main": [
+        [
+          {
+            "node": "📊 Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📷 Post to Instagram": {
+      "main": [
+        [
+          {
+            "node": "📊 Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "👤 Post to Facebook Page": {
+      "main": [
+        [
+          {
+            "node": "📊 Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "💼 Post to LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "📊 Collect Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔴 Post to Reddit": {
+      "main": [
         [
           {
             "node": "📊 Collect Results",
