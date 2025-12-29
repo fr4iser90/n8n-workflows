@@ -109,7 +109,7 @@
     {
       "parameters": {
         "method": "POST",
-        "path": "/upload-event",
+        "url": "http://localhost:5678/webhook/upload-event",
         "options": {
           "formData": true
         }
@@ -462,19 +462,9 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://oauth.reddit.com/api/submit",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "User-Agent",
-              "value": "={{ $env.REDDIT_USER_AGENT || 'n8n-workflow/1.0' }}"
-            }
-          ]
-        },
+        "url": "https://www.reddit.com/api/submit",
         "sendBody": true,
+        "bodyContentType": "form-urlencoded",
         "bodyParameters": {
           "parameters": [
             {
@@ -491,34 +481,16 @@
             },
             {
               "name": "kind",
-              "value": "={{ $json.redditPostType || 'self' }}"
-            },
-            {
-              "name": "nsfw",
-              "value": "={{ $json.redditNsfw ? 'true' : 'false' }}"
-            },
-            {
-              "name": "spoiler",
-              "value": "={{ $json.redditSpoiler ? 'true' : 'false' }}"
-            },
-            {
-              "name": "flair_text",
-              "value": "={{ $json.redditFlair || '' }}"
+              "value": "self"
             }
           ]
         },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
-        }
+        "options": {}
       },
       "id": "ebab7789-9a78-84d0-4746-823b1570e99c",
       "name": "🔴 Post to Reddit",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
+      "typeVersion": 1,
       "position": [
         1140,
         620
@@ -724,6 +696,28 @@
         [
           {
             "node": "🔍 Validate & Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📧 Send Email?": {
+      "main": [
+        [
+          {
+            "node": "📧 Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📧 Send Email": {
+      "main": [
+        [
+          {
+            "node": "📊 Collect Results",
             "type": "main",
             "index": 0
           }

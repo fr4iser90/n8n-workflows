@@ -8,7 +8,7 @@
     {
       "id": "form-trigger",
       "name": "On form submission",
-      "type": "formTrigger",
+      "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
       "parameters": {
         "formTitle": "Neues Event erstellen",
@@ -80,21 +80,33 @@
           ]
         }
       },
-      "position": [100, 80]
+      "position": [-1260, -1020]
     },
     {
       "id": "manual-trigger",
-      "name": "🖱️ Manual Trigger (Quick Post)",
-      "type": "manualTrigger",
+      "name": "📁 Manual File Path Input",
+      "type": "n8n-nodes-base.manualTrigger",
       "parameters": {},
-      "position": [100, -80]
+      "position": [-1260, -1220]
+    },
+    {
+      "id": "read-file-from-path",
+      "name": "📄 Read File from Path",
+      "type": "n8n-nodes-base.readWriteFile",
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $json.filePath }}",
+        "options": {}
+      },
+      "position": [-1040, -1220],
+      "typeVersion": 1
     },
     {
       "id": "parse-manual-input",
       "name": "🔍 Parse Manual Input (Markdown/Image)",
       "type": "code",
       "script": "parse-manual-input.js",
-      "position": [220, -80],
+      "position": [-840, -1220],
       "typeVersion": 2
     },
     {
@@ -103,23 +115,23 @@
       "type": "httpRequest",
       "parameters": {
         "method": "POST",
-        "path": "/upload-event",
+        "url": "http://localhost:5678/webhook/upload-event",
         "options": {
           "formData": true
         }
       },
-      "position": [100, 200]
+      "position": [-1280, -600]
     },
     {
       "id": "webhook-trigger",
       "name": "📥 Webhook Trigger (API)",
-      "type": "webhook",
+      "type": "n8n-nodes-base.webhook",
       "parameters": {
         "httpMethod": "POST",
         "path": "dj-event",
         "responseMode": "responseNode"
       },
-      "position": [260, 80],
+      "position": [-1280, -800],
       "webhookId": "dj-event-webhook"
     },
     {
@@ -129,70 +141,70 @@
       "parameters": {
         "respondWith": "allIncomingItems"
       },
-      "position": [2560, 0]
+      "position": [1720, -940]
     },
     {
       "id": "validate-input",
       "name": "🔍 Validate & Prepare Data",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "validate-input.js",
-      "position": [480, 80],
+      "position": [-560, -920],
       "typeVersion": 2
     },
     {
       "id": "validate-platforms",
       "name": "✅ Validate Platforms",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "validate-platforms.js",
-      "position": [520, 80],
+      "position": [-360, -920],
       "typeVersion": 2
     },
     {
       "id": "validate-urls",
       "name": "🔗 Validate URLs",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "validate-urls.js",
-      "position": [640, 80],
+      "position": [-140, -920],
       "typeVersion": 2
     },
     {
       "id": "format-content",
       "name": "✏️ Format Content for Platforms",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "format-content.js",
-      "position": [760, 80],
+      "position": [80, -920],
       "typeVersion": 2
     },
     {
       "id": "generate-hashtags",
       "name": "🏷️ Generate Hashtags",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "generate-hashtags.js",
-      "position": [880, 80],
+      "position": [260, -920],
       "typeVersion": 2
     },
     {
       "id": "collect-results",
       "name": "📊 Collect Results",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "collect-results.js",
-      "position": [1360, 80],
+      "position": [1080, -940],
       "typeVersion": 2
     },
     {
       "id": "enhanced-logging",
       "name": "📋 Enhanced Logging",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "enhanced-logging.js",
-      "position": [1480, 80],
+      "position": [1240, -940],
       "typeVersion": 2
     },
     {
       "id": "send-notifications",
       "name": "📢 Send Notifications",
-      "type": "code",
+      "type": "n8n-nodes-base.code",
       "script": "send-notifications.js",
-      "position": [1600, 80],
+      "position": [1400, -940],
       "typeVersion": 2
     },
     {
@@ -209,7 +221,7 @@
           }
         ]
       },
-      "position": [1680, 60],
+      "position": [1560, -940],
       "typeVersion": 3.4
     },
     {
@@ -226,16 +238,18 @@
           ]
         }
       },
-      "position": [980, -120],
+      "position": [420, -1340],
       "typeVersion": 2
     },
     {
       "id": "platform-twitter-post",
       "name": "🐦 Post to Twitter/X",
-      "type": "twitter",
-      "parameters": {},
-      "position": [1140, -20],
-      "typeVersion": 2.1
+      "type": "n8n-nodes-base.twitter",
+      "parameters": {
+        "additionalFields": {}
+      },
+      "position": [680, -1340],
+      "typeVersion": 2
     },
     {
       "id": "platform-instagram-check",
@@ -251,15 +265,17 @@
           ]
         }
       },
-      "position": [920, 80],
+      "position": [420, -1160],
       "typeVersion": 2
     },
     {
       "id": "platform-instagram-post",
       "name": "📷 Post to Instagram",
-      "type": "instagram",
-      "parameters": {},
-      "position": [1140, 80],
+      "type": "n8n-nodes-base.instagram",
+      "parameters": {
+        "additionalFields": {}
+      },
+      "position": [680, -1160],
       "typeVersion": 1
     },
     {
@@ -276,15 +292,17 @@
           ]
         }
       },
-      "position": [920, 180],
+      "position": [420, -960],
       "typeVersion": 2
     },
     {
       "id": "platform-facebook-post",
       "name": "👤 Post to Facebook Page",
-      "type": "facebook",
-      "parameters": {},
-      "position": [1140, 180],
+      "type": "n8n-nodes-base.facebook",
+      "parameters": {
+        "additionalFields": {}
+      },
+      "position": [680, -960],
       "typeVersion": 2.1
     },
     {
@@ -301,16 +319,18 @@
           ]
         }
       },
-      "position": [920, 280],
+      "position": [420, -780],
       "typeVersion": 2
     },
     {
       "id": "platform-linkedin-post",
       "name": "💼 Post to LinkedIn",
-      "type": "linkedIn",
-      "parameters": {},
-      "position": [1140, 280],
-      "typeVersion": 2
+      "type": "n8n-nodes-base.linkedIn",
+      "parameters": {
+        "additionalFields": {}
+      },
+      "position": [680, -780],
+      "typeVersion": 1
     },
     {
       "id": "platform-email-check",
@@ -326,7 +346,7 @@
           ]
         }
       },
-      "position": [920, 380],
+      "position": [420, -600],
       "typeVersion": 2
     },
     {
@@ -342,7 +362,7 @@
           "attachments": "={{ $json.imageUrl ? [{ url: $json.imageUrl, name: 'event-image.jpg' }] : [] }}"
         }
       },
-      "position": [1140, 380],
+      "position": [680, -600],
       "typeVersion": 2.1
     },
     {
@@ -359,70 +379,22 @@
           ]
         }
       },
-      "position": [920, 620],
+      "position": [420, -400],
       "typeVersion": 2
     },
     {
       "id": "platform-reddit-post",
       "name": "🔴 Post to Reddit",
-      "type": "httpRequest",
+      "type": "n8n-nodes-base.reddit",
       "parameters": {
-        "method": "POST",
-        "url": "https://oauth.reddit.com/api/submit",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "User-Agent",
-              "value": "={{ $env.REDDIT_USER_AGENT || 'n8n-workflow/1.0' }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "sr",
-              "value": "={{ $json.redditSubreddit }}"
-            },
-            {
-              "name": "title",
-              "value": "={{ $json.eventTitle }}"
-            },
-            {
-              "name": "text",
-              "value": "={{ $json.redditText }}"
-            },
-            {
-              "name": "kind",
-              "value": "={{ $json.redditPostType || 'self' }}"
-            },
-            {
-              "name": "nsfw",
-              "value": "={{ $json.redditNsfw ? 'true' : 'false' }}"
-            },
-            {
-              "name": "spoiler",
-              "value": "={{ $json.redditSpoiler ? 'true' : 'false' }}"
-            },
-            {
-              "name": "flair_text",
-              "value": "={{ $json.redditFlair || '' }}"
-            }
-          ]
-        },
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "json"
-            }
-          }
-        }
+        "resource": "post",
+        "subreddit": "={{ $json.redditSubreddit }}",
+        "title": "={{ $json.eventTitle }}",
+        "text": "={{ $json.redditText }}",
+        "additionalFields": {}
       },
-      "position": [1140, 620],
-      "typeVersion": 4.2
+      "position": [680, -400],
+      "typeVersion": 1
     }
   ],
   "connections": {
@@ -437,7 +409,18 @@
         ]
       ]
     },
-    "🖱️ Manual Trigger (Quick Post)": {
+    "📁 Manual File Path Input": {
+      "main": [
+        [
+          {
+            "node": "read-file-from-path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📄 Read File from Path": {
       "main": [
         [
           {
@@ -464,6 +447,28 @@
         [
           {
             "node": "validate-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📧 Send Email?": {
+      "main": [
+        [
+          {
+            "node": "platform-email-send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "platform-email-send": {
+      "main": [
+        [
+          {
+            "node": "collect-results",
             "type": "main",
             "index": 0
           }
@@ -720,7 +725,7 @@
       "height": 600,
       "width": 800,
       "color": 5,
-      "position": [840, 1120]
+      "position": [380, 100]
     },
     {
       "id": "input-format",
@@ -728,7 +733,7 @@
       "file": "input-format.md",
       "height": 700,
       "width": 600,
-      "position": [40, 640]
+      "position": [-420, -380]
     },
     {
       "id": "credentials-overview",
@@ -737,7 +742,7 @@
       "height": 500,
       "width": 600,
       "color": 3,
-      "position": [40, 1380]
+      "position": [-420, 360]
     },
     {
       "id": "twitter-credentials",
@@ -746,7 +751,7 @@
       "height": 450,
       "width": 500,
       "color": 2,
-      "position": [1960, 600]
+      "position": [1500, -420]
     },
     {
       "id": "instagram-credentials",
@@ -755,7 +760,7 @@
       "height": 710,
       "width": 500,
       "color": 2,
-      "position": [1940, 1380]
+      "position": [1480, 360]
     },
     {
       "id": "facebook-credentials",
@@ -764,7 +769,7 @@
       "height": 680,
       "width": 500,
       "color": 2,
-      "position": [2480, 1380]
+      "position": [2020, 360]
     },
     {
       "id": "linkedin-credentials",
@@ -773,7 +778,7 @@
       "height": 500,
       "width": 500,
       "color": 2,
-      "position": [2520, 600]
+      "position": [2060, -420]
     },
     {
       "id": "reddit-credentials",
@@ -782,7 +787,7 @@
       "height": 960,
       "width": 500,
       "color": 2,
-      "position": [3060, 1380]
+      "position": [2600, 360]
     },
     {
       "id": "email-credentials",
@@ -791,7 +796,7 @@
       "height": 550,
       "width": 500,
       "color": 2,
-      "position": [3140, 580]
+      "position": [2680, -440]
     },
     {
       "id": "discord-telegram-setup",
@@ -800,7 +805,7 @@
       "height": 600,
       "width": 700,
       "color": 6,
-      "position": [3700, 1380]
+      "position": [3240, 360]
     }
   ]
 }
