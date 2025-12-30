@@ -4,6 +4,23 @@
   "nodes": [
     {
       "parameters": {
+        "httpMethod": "POST",
+        "path": "multiplatform-publisher",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "db1cb1a8-09b5-b190-4903-8a112cff091b",
+      "name": "Interface Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        200
+      ],
+      "webhookId": "interface-webhook"
+    },
+    {
+      "parameters": {
         "formTitle": "Neues Event erstellen",
         "formDescription": "Fülle alle Felder aus für die automatische Veröffentlichung auf Social Media",
         "options": {
@@ -169,7 +186,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// EN: Validate and prepare input data\n// DE: Eingabedaten validieren und vorbereiten\nconst item = $input.item.json;\n\n// Required fields check / Pflichtfelder prüfen\nconst requiredFields = ['eventTitle', 'eventDate', 'venue', 'city'];\nconst missingFields = requiredFields.filter(field => !item[field]);\n\nif (missingFields.length > 0) {\n  throw new Error(`Missing required fields: ${missingFields.join(', ')}`);\n}\n\n// Set defaults / Standardwerte setzen\nconst publishTo = item.publishTo || {\n  twitter: true,\n  instagram: true,\n  facebook: true,\n  linkedin: false,\n  reddit: false,\n  email: false\n};\n\n// Format date / Datum formatieren\nlet formattedDate = item.eventDate;\nif (item.eventDate && item.eventTime) {\n  const date = new Date(`${item.eventDate}T${item.eventTime}`);\n  formattedDate = date.toLocaleDateString('de-DE', {\n    weekday: 'long',\n    year: 'numeric',\n    month: 'long',\n    day: 'numeric'\n  });\n}\n\n// Prepare output / Ausgabe vorbereiten\nreturn [{\n  json: {\n    eventTitle: item.eventTitle,\n    eventDate: item.eventDate,\n    eventTime: item.eventTime || '22:00',\n    formattedDate: formattedDate,\n    venue: item.venue,\n    city: item.city,\n    description: item.description || '',\n    imageUrl: item.imageUrl || '',\n    ticketUrl: item.ticketUrl || '',\n    publishTo: publishTo,\n    emailRecipients: item.emailRecipients || [],\n    // Reddit-specific fields / Reddit-spezifische Felder\n    redditSubreddit: item.redditSubreddit || '',\n    redditFlair: item.redditFlair || '',\n    redditNsfw: item.redditNsfw || false,\n    redditSpoiler: item.redditSpoiler || false,\n    redditPostType: item.redditPostType || 'text', // 'text' or 'link'\n    timestamp: new Date().toISOString()\n  }\n}];\n"
+        "jsCode": "// EN: Validate and prepare input data\n// DE: Eingabedaten validieren und vorbereiten\nconst item = $input.item.json;\n\n// Check if this is interface data or form data / Prüfen ob Interface- oder Form-Daten\nconst isInterfaceData = item.files && Array.isArray(item.files);\n\n// Interface data validation / Interface-Daten validierung\nif (isInterfaceData) {\n  // Required fields for interface data\n  if (!item.files || item.files.length === 0) {\n    throw new Error('No files provided');\n  }\n  if (!item.publishTo || Object.keys(item.publishTo).length === 0) {\n    throw new Error('No platforms selected for publishing');\n  }\n\n  // Create content from files and hashtags / Inhalt aus Dateien und Hashtags erstellen\n  const imageFiles = item.files.filter(f => f.isImage);\n  const textFiles = item.files.filter(f => !f.isImage);\n\n  // Use first text file as main content or create from hashtags\n  let eventTitle = 'Multi-Platform Post';\n  let description = '';\n\n  if (textFiles.length > 0) {\n    // Try to extract title from first text file\n    const firstTextFile = textFiles[0];\n    const contentLines = Buffer.from(firstTextFile.base64, 'base64').toString().split('\\n');\n    eventTitle = contentLines[0]?.trim() || 'Multi-Platform Post';\n    description = contentLines.slice(1).join('\\n').trim();\n  }\n\n  // Add hashtags to description\n  if (item.hashtags && item.hashtags.length > 0) {\n    description += '\\n\\n' + item.hashtags.join(' ');\n  }\n\n  // Prepare output for interface data / Ausgabe für Interface-Daten vorbereiten\n  return [{\n    json: {\n      eventTitle: eventTitle,\n      eventDate: new Date().toISOString().split('T')[0], // Today's date\n      eventTime: new Date().toTimeString().slice(0,5), // Current time\n      formattedDate: new Date().toLocaleDateString('de-DE', {\n        weekday: 'long',\n        year: 'numeric',\n        month: 'long',\n        day: 'numeric'\n      }),\n      venue: 'Online',\n      city: 'Web',\n      description: description,\n      imageUrl: imageFiles.length > 0 ? `data:${imageFiles[0].type};base64,${imageFiles[0].base64}` : '',\n      ticketUrl: '',\n      publishTo: item.publishTo,\n      emailRecipients: [],\n      redditSubreddit: item.platformSettings?.reddit?.subreddit || '',\n      redditFlair: item.platformSettings?.reddit?.flair || '',\n      redditNsfw: false,\n      redditSpoiler: false,\n      redditPostType: 'text',\n      // Interface-specific data\n      interfaceData: {\n        files: item.files,\n        hashtags: item.hashtags || [],\n        platformSettings: item.platformSettings || {},\n        metadata: item.metadata || {}\n      },\n      timestamp: new Date().toISOString()\n    }\n  }];\n}\n\n// Form data validation / Form-Daten validierung\nconst requiredFields = ['eventTitle', 'eventDate', 'venue', 'city'];\nconst missingFields = requiredFields.filter(field => !item[field]);\n\nif (missingFields.length > 0) {\n  throw new Error(`Missing required fields: ${missingFields.join(', ')}`);\n}\n\n// Set defaults / Standardwerte setzen\nconst publishTo = item.publishTo || {\n  twitter: true,\n  instagram: true,\n  facebook: true,\n  linkedin: false,\n  reddit: false,\n  email: false\n};\n\n// Format date / Datum formatieren\nlet formattedDate = item.eventDate;\nif (item.eventDate && item.eventTime) {\n  const date = new Date(`${item.eventDate}T${item.eventTime}`);\n  formattedDate = date.toLocaleDateString('de-DE', {\n    weekday: 'long',\n    year: 'numeric',\n    month: 'long',\n    day: 'numeric'\n  });\n}\n\n// Prepare output / Ausgabe vorbereiten\nreturn [{\n  json: {\n    eventTitle: item.eventTitle,\n    eventDate: item.eventDate,\n    eventTime: item.eventTime || '22:00',\n    formattedDate: formattedDate,\n    venue: item.venue,\n    city: item.city,\n    description: item.description || '',\n    imageUrl: item.imageUrl || '',\n    ticketUrl: item.ticketUrl || '',\n    publishTo: publishTo,\n    emailRecipients: item.emailRecipients || [],\n    // Reddit-specific fields / Reddit-spezifische Felder\n    redditSubreddit: item.redditSubreddit || '',\n    redditFlair: item.redditFlair || '',\n    redditNsfw: item.redditNsfw || false,\n    redditSpoiler: item.redditSpoiler || false,\n    redditPostType: item.redditPostType || 'text', // 'text' or 'link'\n    timestamp: new Date().toISOString()\n  }\n}];\n"
       },
       "id": "0ae3ea30-45b9-78f7-4809-8dc561e5914a",
       "name": "🔍 Validate & Prepare Data",
@@ -711,6 +728,17 @@
     }
   ],
   "connections": {
+    "Interface Webhook": {
+      "main": [
+        [
+          {
+            "node": "🔍 Validate & Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "On form submission": {
       "main": [
         [

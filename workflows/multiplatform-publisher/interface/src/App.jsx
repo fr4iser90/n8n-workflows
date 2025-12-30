@@ -34,6 +34,7 @@ function App() {
     selectedPlatforms,
     isProcessing,
     error,
+    successMessage,
     submit,
     reset
   } = useStore()
@@ -82,6 +83,12 @@ function App() {
             </Alert>
           )}
 
+          {successMessage && (
+            <Alert severity="success" sx={{ mt: 4 }}>
+              {successMessage}
+            </Alert>
+          )}
+
           <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
             <Button
               variant="contained"
@@ -91,7 +98,7 @@ function App() {
               startIcon={isProcessing ? <CircularProgress size={20} /> : <SendIcon />}
               sx={{ minWidth: 200 }}
             >
-              {isProcessing ? 'Publishing...' : 'Publish Content'}
+              {isProcessing ? 'Sending to n8n...' : 'Publish Content'}
             </Button>
 
             <Button

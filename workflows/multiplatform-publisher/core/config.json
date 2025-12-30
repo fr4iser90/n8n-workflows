@@ -6,6 +6,20 @@
   "platforms": ["twitter", "instagram", "facebook", "linkedin", "reddit", "email"],
   "nodes": [
     {
+      "id": "webhook-trigger",
+      "name": "Interface Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "multiplatform-publisher",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "interface-webhook",
+      "position": [ 200, 200 ]
+    },
+    {
       "id": "form-trigger",
       "name": "On form submission",
       "type": "n8n-nodes-base.formTrigger",
@@ -435,6 +449,17 @@
     }
   ],
   "connections": {
+    "Interface Webhook": {
+      "main": [
+        [
+          {
+            "node": "validate-input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "On form submission": {
       "main": [
         [

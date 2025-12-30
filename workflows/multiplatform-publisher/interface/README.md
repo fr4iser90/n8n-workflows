@@ -100,21 +100,58 @@ interface/
 
 ## 🔌 n8n Integration
 
-The interface sends data to the n8n workflow via webhook. The payload includes:
+The interface is fully integrated with the Multi-Platform Social Media Publisher n8n workflow. When you click "Publish Content", the following happens:
 
+### Data Flow
+1. **File Conversion**: Uploaded files are converted to base64 format
+2. **Data Packaging**: All data (files, hashtags, platform settings) is packaged into JSON
+3. **Webhook Submission**: Data is sent to the n8n webhook endpoint
+4. **Workflow Processing**: n8n processes the data through the existing workflow pipeline
+
+### Webhook Payload
 ```json
 {
-  "files": [...],
-  "hashtags": [...],
-  "platforms": [...],
-  "platformSettings": {...},
+  "files": [
+    {
+      "name": "event-image.jpg",
+      "type": "image/jpeg",
+      "size": 245760,
+      "base64": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "isImage": true
+    }
+  ],
+  "hashtags": ["#event", "#party", "#techno"],
   "publishTo": {
     "twitter": true,
-    "instagram": false,
-    ...
+    "instagram": true,
+    "facebook": false
+  },
+  "platformSettings": {
+    "reddit": {
+      "subreddit": "r/djsets",
+      "flair": "Event"
+    }
+  },
+  "metadata": {
+    "timestamp": "2024-12-30T10:30:00.000Z",
+    "totalFiles": 1,
+    "platforms": ["twitter", "instagram"],
+    "hashtagCount": 3
   }
 }
 ```
+
+### Configuration
+Update the webhook URL in `src/config.js`:
+```javascript
+n8nWebhookUrl: 'http://your-n8n-instance:5678/webhook/multiplatform-publisher'
+```
+
+### Error Handling
+- **Connection Issues**: Clear error messages for network problems
+- **Server Errors**: Detailed HTTP error status information
+- **Validation Errors**: Client-side validation with immediate feedback
+- **Success Confirmation**: Visual confirmation when content is submitted successfully
 
 ## 🚀 Deployment
 
