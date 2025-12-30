@@ -5,15 +5,15 @@ import config from './config'
 const useStore = create((set, get) => ({
   // File upload state
   uploadedFiles: [],
-  setUploadedFiles: (files) => set({ uploadedFiles: files }),
+  setUploadedFiles: (files) => set({ uploadedFiles: Array.isArray(files) ? files : [] }),
 
   // Hashtags state
   selectedHashtags: [],
-  setSelectedHashtags: (hashtags) => set({ selectedHashtags: hashtags }),
+  setSelectedHashtags: (hashtags) => set({ selectedHashtags: Array.isArray(hashtags) ? hashtags : [] }),
 
   // Platform state
   selectedPlatforms: [],
-  setSelectedPlatforms: (platforms) => set({ selectedPlatforms: platforms }),
+  setSelectedPlatforms: (platforms) => set({ selectedPlatforms: Array.isArray(platforms) ? platforms : [] }),
   platformSettings: {},
   setPlatformSettings: (settings) => set({ platformSettings: settings }),
 

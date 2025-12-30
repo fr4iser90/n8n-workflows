@@ -39,6 +39,11 @@ function App() {
     reset
   } = useStore()
 
+  // Ensure arrays are always arrays
+  const safeSelectedPlatforms = Array.isArray(selectedPlatforms) ? selectedPlatforms : []
+  const safeSelectedHashtags = Array.isArray(selectedHashtags) ? selectedHashtags : []
+  const safeUploadedFiles = Array.isArray(uploadedFiles) ? uploadedFiles : []
+
   const handleSubmit = async () => {
     await submit()
   }
@@ -47,7 +52,7 @@ function App() {
     reset()
   }
 
-  const canSubmit = uploadedFiles.length > 0 && selectedPlatforms.length > 0
+  const canSubmit = safeUploadedFiles.length > 0 && safeSelectedPlatforms.length > 0
 
   return (
     <ThemeProvider theme={theme}>
@@ -66,7 +71,7 @@ function App() {
           </Box>
 
           <Box sx={{ mt: 4 }}>
-            <Preview files={uploadedFiles} />
+            <Preview files={safeUploadedFiles} />
           </Box>
 
           <Box sx={{ mt: 4 }}>
@@ -114,7 +119,7 @@ function App() {
 
           <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              Files: {uploadedFiles.length} • Hashtags: {selectedHashtags.length} • Platforms: {selectedPlatforms.length}
+              Files: {safeUploadedFiles.length} • Hashtags: {safeSelectedHashtags.length} • Platforms: {safeSelectedPlatforms.length}
             </Typography>
           </Box>
         </Box>

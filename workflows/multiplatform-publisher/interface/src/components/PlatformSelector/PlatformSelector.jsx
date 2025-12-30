@@ -78,12 +78,15 @@ function PlatformSelector() {
   const { selectedPlatforms, setSelectedPlatforms, platformSettings, setPlatformSettings } = useStore()
   const [settingsDialog, setSettingsDialog] = useState({ open: false, platform: null })
 
+  // Ensure selectedPlatforms is always an array
+  const safeSelectedPlatforms = Array.isArray(selectedPlatforms) ? selectedPlatforms : []
+
+
   const handlePlatformToggle = (platformId) => {
-    setSelectedPlatforms(prev =>
-      prev.includes(platformId)
-        ? prev.filter(id => id !== platformId)
-        : [...prev, platformId]
-    )
+    const newSelection = safeSelectedPlatforms.includes(platformId)
+      ? safeSelectedPlatforms.filter(id => id !== platformId)
+      : [...safeSelectedPlatforms, platformId]
+    setSelectedPlatforms(newSelection)
   }
 
   const handleSettingsOpen = (platform) => {
@@ -123,7 +126,7 @@ function PlatformSelector() {
       <Grid container spacing={2}>
         {PLATFORMS.map((platform) => {
           const IconComponent = platform.icon
-          const isSelected = selectedPlatforms.includes(platform.id)
+          const isSelected = safeSelectedPlatforms.includes(platform.id)
 
           return (
             <Grid item xs={12} sm={6} md={4} key={platform.id}>
@@ -184,11 +187,11 @@ function PlatformSelector() {
 
       <Box sx={{ textAlign: 'center' }}>
         <Typography variant="h6" gutterBottom>
-          Selected Platforms: {selectedPlatforms.length}
+          Selected Platforms: {safeSelectedPlatforms.length}
         </Typography>
-        {selectedPlatforms.length > 0 && (
+        {safeSelectedPlatforms.length > 0 && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 1, mt: 2 }}>
-            {selectedPlatforms.map(platformId => {
+            {safeSelectedPlatforms.map(platformId => {
               const platform = PLATFORMS.find(p => p.id === platformId)
               return (
                 <Typography key={platformId} variant="body2" sx={{ color: platform.color }}>
